@@ -102,7 +102,7 @@ def main():
                           learning_rate=0.001,
                           grad_clip=30)
     name = 'xjtu_layer5_order15'
-    model_name = '../training result/models/xjtu/' + name + '.pt'
+    model_name = '../models/xjtu/' + name + '.pt'
     torch.save(model, model_name)
     # plot training curve
     plt.figure(0)
@@ -113,12 +113,12 @@ def main():
     plt.xlabel('Epoch')
     plt.title('Training Process')
     plt.grid(True)
-    plt.savefig('../training result/figs/xjtu/' + name + '_loss')
+    plt.savefig('../figs/xjtu/' + name + '_loss')
 
     # evaluation
     val_loss, val_r2 = validation(model, val_set, criterion, num_data=2, origin=True, show=True, fig_num=1)
     print('validation loss = ', val_loss, '\nR2 loss = ', val_r2)
-    plt.savefig('../training result/figs/xjtu/' + name + '_val')
+    plt.savefig('../figs/xjtu/' + name + '_val')
 
     plt.show()
 

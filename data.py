@@ -14,7 +14,7 @@ class MyData:
     @staticmethod
     def get_filter_data():
         x_train, x_test, y_train, y_test = import_data("./dataset/")
-        label = np.load("./new_data/test/lowpass_test_2.npy")
+        label = np.load("..data/new_data/test/lowpass_test_2.npy")
         x_train = x_test
 
         # label.resize([11821, 576, 1])
@@ -34,8 +34,8 @@ class MyData:
 
     @staticmethod
     def get_state_data():
-        x_train = torch.load('./bearing_data/x_train.pt')
-        y_train = torch.load('./bearing_data/y_train_ds.pt')
+        x_train = torch.load('..data/bearing_data/x_train.pt')
+        y_train = torch.load('..data/bearing_data/y_train_ds.pt')
 
         dataset = Data.TensorDataset(x_train, y_train)
 
@@ -43,8 +43,8 @@ class MyData:
 
     @staticmethod
     def get_batterie_data():
-        x_train = torch.load('./bearing_data/x_train_bt.pt')
-        y_train = torch.load('./bearing_data/y_train_bt.pt')
+        x_train = torch.load('..data/bearing_data/x_train_bt.pt')
+        y_train = torch.load('..data/bearing_data/y_train_bt.pt')
 
         dataset = Data.TensorDataset(x_train, y_train)
 
@@ -52,7 +52,7 @@ class MyData:
 
     @staticmethod
     def get_self_made_data():
-        path = './dataset/train_sec_order.mat'
+        path = '..data/dataset/train_sec_order.mat'
         data_dict = scio.loadmat(path)
         d_in = data_dict.get('u_all')
         d_out = data_dict.get('y_all')
@@ -67,8 +67,8 @@ class MyData:
 
     @staticmethod
     def get_10hz_data():
-        x_train = torch.load('./bearing_data/x_train_10hz.pt')
-        y_train = torch.load('./bearing_data/y_train_10hz.pt')
+        x_train = torch.load('..data/bearing_data/x_train_10hz.pt')
+        y_train = torch.load('..data/bearing_data/y_train_10hz.pt')
         # 20 data
         x_train = torch.reshape(x_train, (20, 20, 2))
         x_train = torch.transpose(x_train, 1, 2)
@@ -78,7 +78,7 @@ class MyData:
 
     @staticmethod
     def get_time_variant_data():
-        path = './dataset/time_variant_data.mat'
+        path = '..data/dataset/time_variant_data.mat'
         data_dict = scio.loadmat(path)
         d_in = data_dict.get("u")
         d_out = data_dict.get("y")
@@ -88,7 +88,7 @@ class MyData:
 
     @staticmethod
     def get_motor_data():
-        data_dict = scio.loadmat('./dataset/train_motor.mat')
+        data_dict = scio.loadmat('..data/dataset/train_motor.mat')
         d_in = data_dict.get("u")
         d_in = d_in[:, ::3]
         d_out = data_dict.get("y")
@@ -101,7 +101,7 @@ class MyData:
 
     @staticmethod
     def get_bearing_data():
-        path = './bearing_data/train_outer_1_1.mat'
+        path = '..data/bearing_data/train_outer_1_1.mat'
         data_dict = scio.loadmat(path)
         d_out = data_dict.get('acc_x_outer_1_1_mat')
         d_in = np.zeros_like(d_out)
@@ -113,8 +113,8 @@ class MyData:
 
     @staticmethod
     def get_outer_data():
-        outer_u = torch.load('./bearing_data/xjtu/u_outer.pt')
-        outer_y = torch.load('./bearing_data/xjtu/y_outer.pt')
+        outer_u = torch.load('..data/bearing_data/xjtu/u_outer.pt')
+        outer_y = torch.load('..data/bearing_data/xjtu/y_outer.pt')
         dataset = Data.TensorDataset(outer_u.cuda(),
                                      outer_y.cuda(),
                                      outer_y.cuda())
@@ -123,8 +123,8 @@ class MyData:
 
     @staticmethod
     def get_inner_data():
-        inner_u = torch.load('./bearing_data/xjtu/inner_u.pt')
-        inner_y = torch.load('./bearing_data/xjtu/inner_y.pt')
+        inner_u = torch.load('..data/bearing_data/xjtu/inner_u.pt')
+        inner_y = torch.load('..data/bearing_data/xjtu/inner_y.pt')
         dataset = Data.TensorDataset(inner_u.cuda(),
                                      inner_y.cuda(),
                                      inner_y.cuda())
@@ -133,8 +133,8 @@ class MyData:
 
     @staticmethod
     def get_inner_data_two():
-        inner_u = torch.load('./bearing_data/xjtu/inner_u_2.pt')
-        inner_y = torch.load('./bearing_data/xjtu/inner_y_2.pt')
+        inner_u = torch.load('..data/bearing_data/xjtu/inner_u_2.pt')
+        inner_y = torch.load('..data/bearing_data/xjtu/inner_y_2.pt')
         dataset = Data.TensorDataset(inner_u.cuda(),
                                      inner_y.cuda(),
                                      inner_y.cuda())
@@ -143,8 +143,8 @@ class MyData:
 
     @staticmethod
     def get_case_data():
-        u = torch.load('./bearing_data/case_fd21_u.pt')
-        y = torch.load('./bearing_data/case_fd21_y.pt')
+        u = torch.load('..data/bearing_data/case_fd21_u.pt')
+        y = torch.load('..data/bearing_data/case_fd21_y.pt')
         dataset = Data.TensorDataset(u.cuda(),
                                      y.cuda(),
                                      y.cuda())
@@ -153,8 +153,8 @@ class MyData:
 
     @staticmethod
     def get_case07():
-        u = torch.load('./bearing_data/case_fd07_u.pt')
-        y = torch.load('./bearing_data/case_fd07_y.pt')
+        u = torch.load('..data/bearing_data/case_fd07_u.pt')
+        y = torch.load('..data/bearing_data/case_fd07_y.pt')
         dataset = Data.TensorDataset(u.cuda(),
                                      y.cuda(),
                                      y.cuda())
