@@ -17,7 +17,7 @@ def validation(model: nn.Module,
     val_loader = torch.utils.data.DataLoader(dataset=val_set, batch_size=1, shuffle=False)
     if show:
         fig = plt.figure(fig_num)
-        fig.set_size_inches(16, 9, forward=True)
+        fig.set_size_inches(12, 7, forward=True)
         fig.suptitle('Randomly selected validation data')
     if origin:
         val_loss = []
@@ -63,7 +63,7 @@ def validation(model: nn.Module,
 
 
 if __name__ == '__main__':
-    model = torch.load('./models/case_layer5_order13.pt')
+    model = torch.load('../models/case_fd21/case_layer3_order13.pt')
     data_gen = MyData()
     # dataset = data_gen.get_outer_data()
     dataset = data_gen.get_case_data()
