@@ -2,9 +2,12 @@ import numpy as np
 import torch
 from torch import nn
 
+activ_dict = {'ReLU': nn.ReLU(),
+              'Tanh': nn.Tanh()}
+
 
 class StateNeuron(nn.Module):
-    def __init__(self, order, in_dim=1, out_dim=1, device=torch.device('cpu')):
+    def __init__(self, order, in_dim=1, out_dim=1, activation='Tanh', device=torch.device('cpu')):
         super(StateNeuron, self).__init__()
         self.seq_len = 0
         self.order = order
@@ -15,7 +18,7 @@ class StateNeuron(nn.Module):
         self.weight_c = nn.Parameter(torch.ones((self.out_dim, self.order), device=device))
         self.weight_d = nn.Parameter(torch.ones((self.out_dim, self.inp_dim), device=device))
         self.weight_l = nn.Parameter(torch.ones((self.order, 1), device=device))
-        self.normal_c = torch.FloatTensor(1, self.order)
+        self.activation = activ_dict.get(activation)
         self.transfer_gpu = False
         self.device = device
         if device != torch.device('cpu'):
@@ -25,7 +28,6 @@ class StateNeuron(nn.Module):
     def reset_parameter(self):
         for weight in self.parameters():
             nn.init.uniform_(weight, -0.7, 0.7)
-        self.normal_c[0, 0] = 1
 
     def forward(self, u, y_obs=None):
         if u.ndim > 2:
@@ -62,7 +64,7 @@ class StateNeuron(nn.Module):
                 y_hat = y_t
             else:
                 y_hat = torch.cat((y_hat, y_t), 1)
-        return y_hat
+        return self.activation(y_hat)
 
     def hidden_forward(self, u, y_init):
         self.seq_len = u.shape[1]

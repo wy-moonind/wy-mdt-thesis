@@ -82,16 +82,16 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # start with main function
-    model = StateModel(15, in_dim=2, out_dim=1, observer=True, device=device)
+    model = StateModel(5, in_dim=2, out_dim=1, observer=True, device=device)
     print('Number of parameters: ', model.count_parameters())
     # model = model.cuda(device)
     criterion = RMSELoss()
 
     data_gen = MyData()
-    dataset = data_gen.get_outer_data()
-    # dataset = data_gen.get_case_data()
+    # dataset = data_gen.get_outer_data()
+    dataset = data_gen.get_case07()
 
-    train_set, val_set = torch.utils.data.random_split(dataset, [18, 2])
+    train_set, val_set = torch.utils.data.random_split(dataset, [25, 4])
     # training
     train_history = train(model,
                           criterion,
@@ -101,8 +101,8 @@ def main():
                           optimizer='Adam',
                           learning_rate=0.001,
                           grad_clip=30)
-    name = 'xjtu_layer5_order15'
-    model_name = '../models/xjtu/' + name + '.pt'
+    name = 'test00'
+    model_name = '../models/test/' + name + '.pt'
     torch.save(model, model_name)
     # plot training curve
     plt.figure(0)
@@ -113,12 +113,12 @@ def main():
     plt.xlabel('Epoch')
     plt.title('Training Process')
     plt.grid(True)
-    plt.savefig('../figs/xjtu/' + name + '_loss')
+    plt.savefig('../figs/test/' + name + '_loss')
 
     # evaluation
-    val_loss, val_r2 = validation(model, val_set, criterion, num_data=2, origin=True, show=True, fig_num=1)
+    val_loss, val_r2 = validation(model, val_set, criterion, num_data=4, origin=True, show=True, fig_num=1)
     print('validation loss = ', val_loss, '\nR2 loss = ', val_r2)
-    plt.savefig('../figs/xjtu/' + name + '_val')
+    plt.savefig('../figs/test/' + name + '_val')
 
     plt.show()
 

@@ -163,6 +163,15 @@ def plot_sth():
 
     plt.show()
 
+class rdm:
+
+    def __init__(self):
+        self.activ = nn.Tanh
+
 
 if __name__ == '__main__':
-    case_data()
+    # case_data()
+    tanh = nn.Tanh()
+    x = torch.FloatTensor(2,2)
+    y = tanh(x)
+    print(x, y)

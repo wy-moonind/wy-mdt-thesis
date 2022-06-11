@@ -13,8 +13,8 @@ class MyData:
 
     @staticmethod
     def get_filter_data():
-        x_train, x_test, y_train, y_test = import_data("./dataset/")
-        label = np.load("..data/new_data/test/lowpass_test_2.npy")
+        x_train, x_test, y_train, y_test = import_data("../data/dataset/")
+        label = np.load("../data/new_data/test/lowpass_test_2.npy")
         x_train = x_test
 
         # label.resize([11821, 576, 1])
@@ -34,8 +34,8 @@ class MyData:
 
     @staticmethod
     def get_state_data():
-        x_train = torch.load('..data/bearing_data/x_train.pt')
-        y_train = torch.load('..data/bearing_data/y_train_ds.pt')
+        x_train = torch.load('../data/bearing_data/x_train.pt')
+        y_train = torch.load('../data/bearing_data/y_train_ds.pt')
 
         dataset = Data.TensorDataset(x_train, y_train)
 
@@ -43,8 +43,8 @@ class MyData:
 
     @staticmethod
     def get_batterie_data():
-        x_train = torch.load('..data/bearing_data/x_train_bt.pt')
-        y_train = torch.load('..data/bearing_data/y_train_bt.pt')
+        x_train = torch.load('../data/bearing_data/x_train_bt.pt')
+        y_train = torch.load('../data/bearing_data/y_train_bt.pt')
 
         dataset = Data.TensorDataset(x_train, y_train)
 
@@ -123,8 +123,8 @@ class MyData:
 
     @staticmethod
     def get_inner_data():
-        inner_u = torch.load('..data/bearing_data/xjtu/inner_u.pt')
-        inner_y = torch.load('..data/bearing_data/xjtu/inner_y.pt')
+        inner_u = torch.load('../data/bearing_data/xjtu/inner_u.pt')
+        inner_y = torch.load('../data/bearing_data/xjtu/inner_y.pt')
         dataset = Data.TensorDataset(inner_u.cuda(),
                                      inner_y.cuda(),
                                      inner_y.cuda())
@@ -133,8 +133,8 @@ class MyData:
 
     @staticmethod
     def get_inner_data_two():
-        inner_u = torch.load('..data/bearing_data/xjtu/inner_u_2.pt')
-        inner_y = torch.load('..data/bearing_data/xjtu/inner_y_2.pt')
+        inner_u = torch.load('../data/bearing_data/xjtu/inner_u_2.pt')
+        inner_y = torch.load('../data/bearing_data/xjtu/inner_y_2.pt')
         dataset = Data.TensorDataset(inner_u.cuda(),
                                      inner_y.cuda(),
                                      inner_y.cuda())
@@ -148,7 +148,7 @@ class MyData:
         dataset = Data.TensorDataset(u.cuda(),
                                      y.cuda(),
                                      y.cuda())
-        # length = 29
+        # length = 45
         return dataset
 
     @staticmethod
@@ -158,5 +158,5 @@ class MyData:
         dataset = Data.TensorDataset(u.cuda(),
                                      y.cuda(),
                                      y.cuda())
-        # length = 45
+        # length = 29
         return dataset
