@@ -64,7 +64,7 @@ class StateNeuron(nn.Module):
                 y_hat = y_t
             else:
                 y_hat = torch.cat((y_hat, y_t), 1)
-        return self.activation(y_hat)
+        return self.activation(y_hat) * 1.5
 
     def hidden_forward(self, u, y_init):
         self.seq_len = u.shape[1]

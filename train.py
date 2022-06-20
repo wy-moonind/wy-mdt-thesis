@@ -82,16 +82,16 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # start with main function
-    model = StateModel(5, in_dim=2, out_dim=1, observer=True, device=device)
+    model = StateModel(3, in_dim=2, out_dim=1, observer=True, device=device)
     print('Number of parameters: ', model.count_parameters())
     # model = model.cuda(device)
     criterion = RMSELoss()
 
     data_gen = MyData()
     # dataset = data_gen.get_outer_data()
-    dataset = data_gen.get_case07()
+    dataset = data_gen.get_case_data()
 
-    train_set, val_set = torch.utils.data.random_split(dataset, [25, 4])
+    train_set, val_set = torch.utils.data.random_split(dataset, [41, 4])
     # training
     train_history = train(model,
                           criterion,
@@ -101,7 +101,7 @@ def main():
                           optimizer='Adam',
                           learning_rate=0.001,
                           grad_clip=30)
-    name = 'test00'
+    name = 'test07'
     model_name = '../models/test/' + name + '.pt'
     torch.save(model, model_name)
     # plot training curve
@@ -113,12 +113,12 @@ def main():
     plt.xlabel('Epoch')
     plt.title('Training Process')
     plt.grid(True)
-    plt.savefig('../figs/test/' + name + '_loss')
+    plt.savefig('../figs/test/' + name + '_loss', dpi=300)
 
     # evaluation
     val_loss, val_r2 = validation(model, val_set, criterion, num_data=4, origin=True, show=True, fig_num=1)
     print('validation loss = ', val_loss, '\nR2 loss = ', val_r2)
-    plt.savefig('../figs/test/' + name + '_val')
+    plt.savefig('../figs/test/' + name + '_val', dpi=300)
 
     plt.show()
 

@@ -46,9 +46,9 @@ def validation(model: nn.Module,
             plt.plot(pred_obs.detach().numpy().T)
             if origin:
                 plt.plot(pred.detach().numpy().T)
-                plt.legend(["raw", "prediction with obs", "prediction"]) #
+                plt.legend(["target", "prediction with obs", "prediction"]) #
             else:
-                plt.legend(["raw", "prediction"])
+                plt.legend(["target", "prediction"])
             plt.ylabel('Acceleration')
             plt.grid(True)
     if origin:
