@@ -3,7 +3,10 @@ import torch
 from torch import nn
 
 activ_dict = {'ReLU': nn.ReLU(),
-              'Tanh': nn.Tanh()}
+              'Tanh': nn.Tanh(),
+              'Sigmoid': nn.Sigmoid(),
+              'Softmax': nn.Softmax(dim=1),
+              'Softplus': nn.Softplus()}
 
 
 class StateNeuron(nn.Module):
@@ -56,7 +59,6 @@ class StateNeuron(nn.Module):
                 y_t = torch.mm(self.weight_c, hidden) + self.weight_d * u[:, i] + noise
                 # y_t = torch.mm(self.normal_c, hidden)
                 x_t1 = torch.mm(self.weight_a, hidden) + self.weight_b * u[:, i]
-            # if self.observer:
             if y_obs is not None:
                 x_t1 += self.weight_l * (y_obs[0, i] - y_t)
             hidden = x_t1

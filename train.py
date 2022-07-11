@@ -82,7 +82,7 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     # start with main function
-    model = StateModel(3, in_dim=2, out_dim=1, observer=True, device=device)
+    model = StateModel(15, in_dim=2, out_dim=1, observer=True, activation='Tanh', device=device)
     print('Number of parameters: ', model.count_parameters())
     # model = model.cuda(device)
     criterion = RMSELoss()
@@ -101,7 +101,7 @@ def main():
                           optimizer='Adam',
                           learning_rate=0.001,
                           grad_clip=30)
-    name = 'test07'
+    name = 'test_tanh_15_5'
     model_name = '../models/test/' + name + '.pt'
     torch.save(model, model_name)
     # plot training curve
