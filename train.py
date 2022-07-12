@@ -81,17 +81,20 @@ def main():
     BATCH_SIZE = 1
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+    order = int(sys.argv[1])
+    name = sys.argv[2]  # 'test_07_tanh_7_4'
+
     # start with main function
-    model = StateModel(15, in_dim=2, out_dim=1, observer=True, activation='Tanh', device=device)
+    model = StateModel(order, in_dim=2, out_dim=1, observer=True, activation='Tanh', device=device)
     print('Number of parameters: ', model.count_parameters())
     # model = model.cuda(device)
     criterion = RMSELoss()
 
     data_gen = MyData()
     # dataset = data_gen.get_outer_data()
-    dataset = data_gen.get_case_data()
+    dataset = data_gen.get_case07()
 
-    train_set, val_set = torch.utils.data.random_split(dataset, [41, 4])
+    train_set, val_set = torch.utils.data.random_split(dataset, [25, 4])
     # training
     train_history = train(model,
                           criterion,
@@ -101,7 +104,7 @@ def main():
                           optimizer='Adam',
                           learning_rate=0.001,
                           grad_clip=30)
-    name = 'test_tanh_15_5'
+
     model_name = '../models/test/' + name + '.pt'
     torch.save(model, model_name)
     # plot training curve
