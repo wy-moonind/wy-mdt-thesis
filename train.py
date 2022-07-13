@@ -80,7 +80,8 @@ def main():
     EPOCH = 250
     BATCH_SIZE = 1
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+    
+    assert len(sys.argv) == 3
     order = int(sys.argv[1])
     name = sys.argv[2]  # 'test_07_tanh_7_4'
 
