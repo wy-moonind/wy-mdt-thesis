@@ -36,17 +36,17 @@ class StateModel(nn.Module):
         self.activation = activation
         self.state_layer1 = StateNeuron(self.order,
                                         in_dim=self.in_dim,
-                                        out_dim=2,
+                                        out_dim=self.out_dim,
                                         activation=self.activation,
                                         device=device)
-        self.state_layer2 = StateNeuron(self.order,
-                                        in_dim=2,
-                                        out_dim=4,
-                                        device=device)
-        self.state_layer3 = StateNeuron(self.order,
-                                        in_dim=4,
-                                        out_dim=self.out_dim,
-                                        device=device)
+        # self.state_layer2 = StateNeuron(self.order,
+        #                                 in_dim=2,
+        #                                 out_dim=self.out_dim,
+        #                                 device=device)
+        # self.state_layer3 = StateNeuron(self.order,
+        #                                 in_dim=4,
+        #                                 out_dim=self.out_dim,
+        #                                 device=device)
         # self.state_layer4 = StateNeuron(self.order,
         #                                 in_dim=6,
         #                                 out_dim=self.out_dim,
@@ -64,9 +64,9 @@ class StateModel(nn.Module):
     def forward(self, x, y_obs=None):
         if y_obs is not None:
             assert self.observer
-        out1 = self.state_layer1(x)
-        out2 = self.state_layer2(out1)
-        out3 = self.state_layer3(out2, y_obs=y_obs)
+        out1 = self.state_layer1(x, y_obs=y_obs)
+        # out2 = self.state_layer2(out1)
+        # out3 = self.state_layer3(out2)
         # out4 = self.state_layer4(out3)
         # out5 = self.state_layer5(out4)
-        return out3
+        return out1

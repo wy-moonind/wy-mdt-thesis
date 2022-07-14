@@ -38,7 +38,7 @@ def train(model: nn.Module,
             y_init = torch.autograd.Variable(batch_yobs)
             y = torch.autograd.Variable(batch_y)
 
-            output = model(x, y_obs=y_init)
+            output = model((x, y_init))
             # output = model(x)
             loss = criterion(output, y)
             temp_r2 = r2_loss(output, y)
@@ -82,13 +82,13 @@ def main():
     BATCH_SIZE = 1
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    assert len(sys.argv) == 3
+    assert len(sys.argv) == 2
     order = int(sys.argv[1])
-    name = sys.argv[2]  # 'test_07_tanh_7_4'
 
     # start with main function
-    model = StateModel(order, in_dim=2, out_dim=1, observer=True, activation='Softplus', device=device)
-    print('Number of parameters: ', model.count_parameters())
+    
+
+
     # model = model.cuda(device)
     criterion = RMSELoss()
 
@@ -107,25 +107,9 @@ def main():
                           learning_rate=0.001,
                           grad_clip=30)
 
-    model_name = '../models/test/' + name + '.pt'
-    torch.save(model, model_name)
-    # plot training curve
-    plt.figure(0)
-    plt.plot(train_history.train_loss)
-    plt.plot(train_history.train_r2)
-    plt.ylim(0, 1)
-    plt.legend(['Training loss', 'Training R2-value'])
-    plt.xlabel('Epoch')
-    plt.title('Training Process')
-    plt.grid(True)
-    plt.savefig('../figs/test/' + name + '_loss', dpi=300)
-
     # evaluation
     val_loss, val_r2 = validation(model, val_set, criterion, num_data=4, origin=True, show=True, fig_num=1)
     print('validation loss = ', val_loss, '\nR2 loss = ', val_r2)
-    plt.savefig('../figs/test/' + name + '_val', dpi=300)
-
-    plt.show()
 
     return 0
 
