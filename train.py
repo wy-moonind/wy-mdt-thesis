@@ -87,16 +87,16 @@ def main():
     name = sys.argv[2]  # 'test_07_tanh_7_4'
 
     # start with main function
-    model = StateModel(order, in_dim=2, out_dim=1, observer=True, activation='Softplus', device=device)
+    model = StateModel(order, in_dim=2, out_dim=1, observer=True, activation='Tanh', device=device)
     print('Number of parameters: ', model.count_parameters())
     # model = model.cuda(device)
     criterion = RMSELoss()
 
     data_gen = MyData()
     # dataset = data_gen.get_outer_data()
-    dataset = data_gen.get_case07()
+    dataset = data_gen.get_case_data()
 
-    train_set, val_set = torch.utils.data.random_split(dataset, [25, 4])
+    train_set, val_set = torch.utils.data.random_split(dataset, [41, 4])
     # training
     train_history = train(model,
                           criterion,

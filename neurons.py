@@ -21,6 +21,8 @@ class StateNeuron(nn.Module):
         self.weight_c = nn.Parameter(torch.ones((self.out_dim, self.order), device=device))
         self.weight_d = nn.Parameter(torch.ones((self.out_dim, self.inp_dim), device=device))
         self.weight_l = nn.Parameter(torch.ones((self.order, 1), device=device))
+        self.weight_alpha = nn.Parameter(torch.ones((self.order, 1), device=device))
+        self.weight_delta = nn.Parameter(torch.tensor(0.5, device=device))
         self.activation = activ_dict.get(activation)
         self.transfer_gpu = False
         self.device = device
@@ -31,6 +33,13 @@ class StateNeuron(nn.Module):
     def reset_parameter(self):
         for weight in self.parameters():
             nn.init.uniform_(weight, -0.7, 0.7)
+    
+    def nonlinear(self, error):
+        if(torch.abs(error) <= self.weight_delta):
+            return torch.div(error, torch.pow(input=self.weight_delta, exponent=(1-self.weight_alpha)))
+        else:
+            return torch.pow(input=torch.abs(error), exponent=self.weight_alpha) * torch.sign(error)
+
 
     def forward(self, u, y_obs=None):
         if u.ndim > 2:
@@ -60,13 +69,14 @@ class StateNeuron(nn.Module):
                 # y_t = torch.mm(self.normal_c, hidden)
                 x_t1 = torch.mm(self.weight_a, hidden) + self.weight_b * u[:, i]
             if y_obs is not None:
-                x_t1 += self.weight_l * (y_obs[0, i] - y_t)
+                # x_t1 += self.weight_l * (y_obs[0, i] - y_t)
+                x_t1 += self.weight_l * self.nonlinear(y_obs[0, i] - y_t)
             hidden = x_t1
             if i == 0:
                 y_hat = y_t
             else:
                 y_hat = torch.cat((y_hat, y_t), 1)
-        return self.activation(y_hat) - 3
+        return self.activation(y_hat) * 1.5
 
     def hidden_forward(self, u, y_init):
         self.seq_len = u.shape[1]
