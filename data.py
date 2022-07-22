@@ -142,21 +142,28 @@ class MyData:
         return dataset
 
     @staticmethod
-    def get_case_data():
-        u = torch.load('../data/bearing_data/case_fd21_u.pt')
-        y = torch.load('../data/bearing_data/case_fd21_y.pt')
-        dataset = Data.TensorDataset(u.cuda(),
-                                     y.cuda(),
-                                     y.cuda())
-        # length = 45
-        return dataset
+    def get_case_data(name:str):
+        len_dict = {'fd07_outer':25,
+                    'fd21_outer':41,
+                    'fd07_inner':52,
+                    'fd14_outer':39,
+                    'fd21_outer':63,
+                    'fd28_outer':56
+                    }
+        length = len_dict.get(name)
+        train_u_name = '../data/case_data/train/train_u_' + name + '.pt'
+        train_y_name = '../data/case_data/train/train_y_' + name + '.pt'
+        test_u_name = '../data/case_data/test/test_u_' + name + '.pt'
+        test_y_name = '../data/case_data/test/test_y_' + name + '.pt'
+        train_u = torch.load(train_u_name)
+        train_y = torch.load(train_y_name)
+        test_u = torch.load(test_u_name)
+        test_y = torch.load(test_y_name)
+        train_set = Data.TensorDataset(train_u.cuda(),
+                                        train_y.cuda(),
+                                        train_y.cuda())
+        test_set = Data.TensorDataset(test_u.cuda(),
+                                        test_y.cuda(),
+                                        test_y.cuda())
 
-    @staticmethod
-    def get_case07():
-        u = torch.load('../data/bearing_data/case_fd07_u.pt')
-        y = torch.load('../data/bearing_data/case_fd07_y.pt')
-        dataset = Data.TensorDataset(u.cuda(),
-                                     y.cuda(),
-                                     y.cuda())
-        # length = 29
-        return dataset
+        return train_set, test_set, length

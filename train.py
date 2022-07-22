@@ -82,9 +82,10 @@ def main():
     BATCH_SIZE = 1
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    assert len(sys.argv) == 3
+    assert len(sys.argv) == 4
     order = int(sys.argv[1])
     name = sys.argv[2]  # 'test_07_tanh_7_4'
+    data = sys.argv[3] # 'fd07_outer'
 
     # start with main function
     model = StateModel(order, in_dim=2, out_dim=1, observer=True, activation='Tanh', device=device)
@@ -93,10 +94,9 @@ def main():
     criterion = RMSELoss()
 
     data_gen = MyData()
-    # dataset = data_gen.get_outer_data()
-    dataset = data_gen.get_case_data()
+    train_set, test_set, train_size = data_gen.get_case_data(data)
 
-    train_set, val_set = torch.utils.data.random_split(dataset, [41, 4])
+    # train_set, val_set = torch.utils.data.random_split(train_set, [41, 4])
     # training
     train_history = train(model,
                           criterion,
@@ -121,7 +121,7 @@ def main():
     plt.savefig('../figs/test/' + name + '_loss', dpi=300)
 
     # evaluation
-    val_loss, val_r2 = validation(model, val_set, criterion, num_data=4, origin=True, show=True, fig_num=1)
+    val_loss, val_r2 = validation(model, test_set, criterion, num_data=4, origin=True, show=True, fig_num=1)
     print('validation loss = ', val_loss, '\nR2 loss = ', val_r2)
     plt.savefig('../figs/test/' + name + '_val', dpi=300)
 

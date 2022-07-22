@@ -98,38 +98,73 @@ def split_data(u, y, length):
         y_target.append(y[i, :])
     return u_target, y_target
 
+def split_train_test(u1_all, u2_all, u3_all, u4_all, c1_all, c2_all, c3_all, c4_all):
+    u1_train = u1_all[:-1]
+    u2_train = u2_all[:-1]
+    u3_train = u3_all[:-1]
+    u4_train = u4_all[:-1]
+    u1_test = [u1_all[-1]]
+    u2_test = [u2_all[-1]]
+    u3_test = [u3_all[-1]]
+    u4_test = [u4_all[-1]]
+    c1_train = c1_all[:-1]
+    c2_train = c2_all[:-1]
+    c3_train = c3_all[:-1]
+    c4_train = c4_all[:-1]
+    c1_test = [c1_all[-1]]
+    c2_test = [c2_all[-1]]
+    c3_test = [c3_all[-1]]
+    c4_test = [c4_all[-1]]
 
-def case_data():
-    case_all = scio.loadmat('./bearing_data/case_fd07_outer.mat')
-    u144 = case_all.get('u_144')
-    u145 = case_all.get('u_145')
-    u146 = case_all.get('u_146')
-    u147 = case_all.get('u_147')
+    u_train = u1_train + u2_train + u3_train + u4_train
+    c_train = c1_train + c2_train + c3_train + c4_train 
+    u_test = u1_test + u2_test + u3_test + u4_test
+    c_test = c1_test + c2_test + c3_test + c4_test
 
-    y144 = case_all.get('x144')
-    y145 = case_all.get('x145')
-    y146 = case_all.get('x146')
-    y147 = case_all.get('x147')
+    return u_train, c_train, u_test, c_test
 
-    u144_all, y144_all = split_data(u144, y144, 9)
-    u145_all, y145_all = split_data(u145, y145, 8)
-    u146_all, y146_all = split_data(u146, y146, 6)
-    u147_all, y147_all = split_data(u147, y147, 6)
 
-    print(u144_all[0].shape, y144_all[0].shape)
+def case_data(path:str):
+    case_all = scio.loadmat(path)
+    u1 = case_all.get('u1')
+    u2 = case_all.get('u2')
+    u3 = case_all.get('u3')
+    u4 = case_all.get('u4')
+    print(u1.shape, u2.shape, u3.shape, u4.shape)
 
-    u_case_all = u144_all + u145_all + u146_all + u147_all
-    y_case_all = y144_all + y145_all + y146_all + y147_all
+    c1 = case_all.get('c1')
+    c2 = case_all.get('c2')
+    c3 = case_all.get('c3')
+    c4 = case_all.get('c4')
 
-    u_case_all = torch.FloatTensor(u_case_all)
-    y_case_all = torch.FloatTensor(y_case_all)
+    len1 = c1.shape[0]
+    len2 = c2.shape[0]
+    len3 = c3.shape[0]
+    len4 = c4.shape[0]
+    
+    u1_all, c1_all = split_data(u1, c1, len1)
+    u2_all, c2_all = split_data(u2, c2, len2)
+    u3_all, c3_all = split_data(u3, c3, len3)
+    u4_all, c4_all = split_data(u4, c4, len4)
 
-    print(u_case_all.shape, y_case_all.shape)
+    print(len(u1_all), len(c1_all))
 
-    torch.save(u_case_all, './bearing_data/case_fd07_u.pt')
-    torch.save(y_case_all, './bearing_data/case_fd07_y.pt')
+    u_train, c_train, u_test, c_test = split_train_test(u1_all, u2_all, u3_all, u4_all, c1_all, c2_all, c3_all, c4_all)
 
-    return None
+    u_train = torch.FloatTensor(u_train)
+    c_train = torch.FloatTensor(c_train)
+
+    u_test = torch.FloatTensor(u_test)
+    c_test = torch.FloatTensor(c_test)
+
+    print(u_train.shape, u_test.shape)
+
+    torch.save(u_train, '../data/case_data/train/train_u_fd28_inner.pt')
+    torch.save(c_train, '../data/case_data/train/train_y_fd28_inner.pt')
+    torch.save(u_test, '../data/case_data/test/test_u_fd28_inner.pt')
+    torch.save(c_test, '../data/case_data/test/test_y_fd28_inner.pt')
+
+    pass
 
 
 def plot_sth():
@@ -163,15 +198,9 @@ def plot_sth():
 
     plt.show()
 
-class rdm:
-
-    def __init__(self):
-        self.activ = nn.Tanh
 
 
 if __name__ == '__main__':
-    # case_data()
-    tanh = nn.Tanh()
-    x = torch.FloatTensor(2,2)
-    y = tanh(x)
-    print(x, y)
+    path = '../data/case_fd28_inner.mat'
+    case_data(path)
+    
