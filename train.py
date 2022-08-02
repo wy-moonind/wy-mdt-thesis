@@ -17,7 +17,7 @@ def train(model: nn.Module,
           val_set=None,
           batch_size=1,
           optimizer='Adam',
-          learning_rate=0.001,
+          learning_rate=0.0005,
           grad_clip=30):
 
     history = TrainingHistory()
@@ -38,8 +38,8 @@ def train(model: nn.Module,
             y_init = torch.autograd.Variable(batch_yobs)
             y = torch.autograd.Variable(batch_y)
 
-            output = model(x, y_obs=y_init)
-            # output = model(x)
+            # output = model(x, y_obs=y_init)
+            output = model(x)
             loss = criterion(output, y)
             temp_r2 = r2_loss(output, y)
 
@@ -88,13 +88,14 @@ def main():
     data = sys.argv[3] # 'fd07_outer'
 
     # start with main function
-    model = StateModel(order, in_dim=2, out_dim=1, observer=True, activation='Tanh', device=device)
+    model = StateModel(order, in_dim=2, out_dim=1, observer=True, activation='None', device=device)
     print('Number of parameters: ', model.count_parameters())
     # model = model.cuda(device)
     criterion = RMSELoss()
 
     data_gen = MyData()
     train_set, test_set, train_size = data_gen.get_case_data(data)
+    print("Dataset size: ", train_size)
 
     # train_set, val_set = torch.utils.data.random_split(train_set, [41, 4])
     # training
@@ -121,8 +122,9 @@ def main():
     plt.savefig('../figs/test/' + name + '_loss', dpi=300)
 
     # evaluation
-    val_loss, val_r2 = validation(model, test_set, criterion, num_data=4, origin=True, show=True, fig_num=1)
-    print('validation loss = ', val_loss, '\nR2 loss = ', val_r2)
+    val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(model, test_set, criterion, num_data=4, origin=True, obs=False, show=True, fig_num=1)
+    print('validation loss with obs = ', val_loss_obs, '\nR2 loss with obs = ', val_r2_obs)
+    print('validation loss wo obs = ', val_loss_wo, '\nR2 loss wo obs = ', val_r2_wo)
     plt.savefig('../figs/test/' + name + '_val', dpi=300)
 
     plt.show()

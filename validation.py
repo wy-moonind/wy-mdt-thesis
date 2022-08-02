@@ -11,7 +11,8 @@ def validation(model: nn.Module,
                val_set: torch.utils.data.TensorDataset,
                criterion: nn.Module,
                num_data=5,
-               origin=False,
+               origin=False, # print without observer result
+               obs=False, # print observer result
                show=False,
                fig_num=1):
     val_loader = torch.utils.data.DataLoader(dataset=val_set, batch_size=1, shuffle=False)
@@ -20,46 +21,50 @@ def validation(model: nn.Module,
         fig.set_size_inches(12, 7, forward=True)
         fig.suptitle('Randomly selected validation data')
     if origin:
-        val_loss = []
-        val_r2 = []
+        val_loss_wo = []
+        val_r2_wo = []
     val_loss_obs = []
-    val_r2_per_step = []
+    val_r2_obs = []
     for idx, (batch_x, batch_obs, batch_y) in enumerate(val_loader):
-        pred_obs = model(batch_x, y_obs=batch_obs).cpu()
-        pred = model(batch_x).cpu()
+        if obs:
+            pred_obs = model(batch_x, y_obs=batch_obs).cpu()
+            temp_val_r2 = r2_loss(pred_obs.cuda(), batch_y)
+            temp_loss_obs = criterion(pred_obs.cuda(), batch_y).item()
+            val_loss_obs.append(temp_loss_obs)
+            val_r2_obs.append(temp_val_r2)
         if origin:
+            pred = model(batch_x).cpu()
             temp_loss = criterion(pred.cuda(), batch_y).item()
             temp_r2 = r2_loss(pred.cuda(), batch_y)
-            val_loss.append(temp_loss)
-            val_r2.append(temp_r2)
-
-        temp_val_r2 = r2_loss(pred_obs.cuda(), batch_y)
-        temp_loss_obs = criterion(pred_obs.cuda(), batch_y).item()
-
-        val_loss_obs.append(temp_loss_obs)
-        val_r2_per_step.append(temp_val_r2)
+            val_loss_wo.append(temp_loss)
+            val_r2_wo.append(temp_r2)  
 
         if show:
             assert idx <= num_data
             plt.subplot(num_data, 1, idx + 1)
             plt.plot(batch_y.detach().cpu().numpy().T)
-            plt.plot(pred_obs.detach().numpy().T)
+            lgd_vec = ["target"]
+            if obs:
+                plt.plot(pred_obs.detach().numpy().T)
+                lgd_vec.append("prediction with obs")
             if origin:
                 plt.plot(pred.detach().numpy().T)
-                plt.legend(["target", "prediction with obs", "prediction"]) #
-            else:
-                plt.legend(["target", "prediction"])
+                lgd_vec.append("prediction")
+            plt.legend(lgd_vec)
             plt.ylabel('Acceleration')
             plt.grid(True)
+    avg_val_loss_wo = None
+    avg_val_r2_wo = None
+    avg_val_loss_obs = None
+    avg_val_r2_obs = None
     if origin:
-        avg_val_loss = sum(val_loss) / len(val_loss)
-        print('validation loss without obs: ', avg_val_loss)
-        avg_val_r2_wo = sum(val_r2) / len(val_r2)
-        print('validation r2 without obs: ', float(avg_val_r2_wo))
-    avg_val_loss_obs = sum(val_loss_obs) / len(val_loss_obs)
-    avg_val_r2 = sum(val_r2_per_step) / len(val_r2_per_step)
+        avg_val_loss_wo = float(sum(val_loss_wo) / len(val_loss_wo))
+        avg_val_r2_wo = float(sum(val_r2_wo) / len(val_r2_wo))
+    if obs:
+        avg_val_loss_obs = float(sum(val_loss_obs) / len(val_loss_obs))
+        avg_val_r2_obs = float(sum(val_r2_obs) / len(val_r2_obs))
 
-    return avg_val_loss_obs, float(avg_val_r2)
+    return avg_val_loss_obs, avg_val_r2_obs, avg_val_loss_wo, avg_val_r2_wo
 
 
 if __name__ == '__main__':

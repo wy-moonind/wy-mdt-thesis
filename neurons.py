@@ -2,11 +2,15 @@ import numpy as np
 import torch
 from torch import nn
 
+def non_act(x):
+    return x
+
 activ_dict = {'ReLU': nn.ReLU(),
               'Tanh': nn.Tanh(),
               'Sigmoid': nn.Sigmoid(),
               'Softmax': nn.Softmax(dim=1),
-              'Softplus': nn.Softplus()}
+              'Softplus': nn.Softplus(),
+              'None': non_act}
 
 
 class StateNeuron(nn.Module):
@@ -35,6 +39,7 @@ class StateNeuron(nn.Module):
             nn.init.uniform_(weight, -0.7, 0.7)
     
     def nonlinear(self, error):
+        # fal function
         if(torch.abs(error) <= self.weight_delta):
             return torch.div(error, torch.pow(input=self.weight_delta, exponent=(1-self.weight_alpha)))
         else:
@@ -69,8 +74,8 @@ class StateNeuron(nn.Module):
                 # y_t = torch.mm(self.normal_c, hidden)
                 x_t1 = torch.mm(self.weight_a, hidden) + self.weight_b * u[:, i]
             if y_obs is not None:
-                # x_t1 += self.weight_l * (y_obs[0, i] - y_t)
-                x_t1 += self.weight_l * self.nonlinear(y_obs[0, i] - y_t)
+                x_t1 += self.weight_l * (y_obs[0, i] - y_t)
+                # x_t1 += self.weight_l * self.nonlinear(y_obs[0, i] - y_t)
             hidden = x_t1
             if i == 0:
                 y_hat = y_t
