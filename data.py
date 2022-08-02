@@ -146,9 +146,9 @@ class MyData:
         len_dict = {'fd07_outer':25,
                     'fd21_outer':41,
                     'fd07_inner':52,
-                    'fd14_outer':39,
-                    'fd21_outer':63,
-                    'fd28_outer':56
+                    'fd14_inner':39,
+                    'fd21_inner':63,
+                    'fd28_inner':56
                     }
         length = len_dict.get(name)
         train_u_name = '../data/case_data/train/train_u_' + name + '.pt'

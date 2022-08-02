@@ -1,33 +1,12 @@
 import torch
 from torch import nn
-from filter_neuron import PassFilter
 from neurons import StateNeuron
 
-
-class TrainingHistory:
-
-    def __init__(self):
-        self.train_loss = []
-        self.val_loss = []
-        self.train_r2 = []
-
-
-class PassFilterModel(nn.Module):
-
-    def __init__(self, seq_len, order, critical_freq):
-        super(PassFilterModel, self).__init__()
-        self.seq_len = seq_len
-        self.order = order
-        self.critical_freq = critical_freq
-        self.filter_layer = PassFilter(self.seq_len, self.order, self.critical_freq)
-
-    def forward(self, x):
-        return self.filter_layer(x)
 
 
 class StateModel(nn.Module):
 
-    def __init__(self, order, in_dim=1, out_dim=1, observer=False, activation='Tanh',device=torch.device('cpu')):
+    def __init__(self, order, in_dim=1, out_dim=1, observer=False, activation='Tanh', device=torch.device('cpu')):
         super(StateModel, self).__init__()
         self.order = order
         self.in_dim = in_dim
@@ -58,7 +37,8 @@ class StateModel(nn.Module):
 
     def count_parameters(self):
         total_num = sum(p.numel() for p in self.parameters())
-        trainable_num = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        trainable_num = sum(p.numel()
+                            for p in self.parameters() if p.requires_grad)
         return {'Total': total_num, 'Trainable': trainable_num}
 
     def forward(self, x, y_obs=None):
