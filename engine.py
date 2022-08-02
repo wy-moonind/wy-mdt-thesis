@@ -8,6 +8,7 @@ from torch import nn
 import matplotlib.pyplot as plt
 from data import MyData
 import sys
+import json
 
 
 class StateModel(nn.Module):
@@ -63,23 +64,25 @@ def main():
     BATCH_SIZE = 1
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    assert len(sys.argv) == 4
-    order = int(sys.argv[1])
-    name = sys.argv[2]  # 'test_07_tanh_7_4'
-    data = sys.argv[3]  # 'fd07_outer'
+    assert len(sys.argv) == 2
+    with open('./config.json') as f:
+        config = json.load(f)
+
+    order = config['order']
+    name = config['name']
+    data = config['data']
+    fig_path = config['fig_path']
 
     # start with main function
     model = StateModel(order, in_dim=2, out_dim=1,
                        observer=False, activation='None', device=device)
     print('Number of parameters: ', model.count_parameters())
-    # model = model.cuda(device)
     criterion = RMSELoss()
 
     data_gen = MyData()
     train_set, test_set, train_size = data_gen.get_case_data(data)
     print("Dataset size: ", train_size)
 
-    # train_set, val_set = torch.utils.data.random_split(train_set, [41, 4])
     # training
     train_history = train(model,
                           criterion,
@@ -102,7 +105,7 @@ def main():
     plt.xlabel('Epoch')
     plt.title('Training Process')
     plt.grid(True)
-    plt.savefig('../figs/test/' + name + '_loss', dpi=300)
+    plt.savefig(fig_path + name + '_loss', dpi=300)
 
     # evaluation
     val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(
@@ -111,7 +114,7 @@ def main():
           '\nR2 loss with obs = ', val_r2_obs)
     print('validation loss wo obs = ', val_loss_wo,
           '\nR2 loss wo obs = ', val_r2_wo)
-    plt.savefig('../figs/test/' + name + '_val', dpi=300)
+    plt.savefig(fig_path + name + '_val', dpi=300)
 
     plt.show()
 

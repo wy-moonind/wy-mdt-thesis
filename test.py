@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch import nn
 import sys
+import json
 
 # points = torch.linspace(-3, 3, 100)
 # tanh = nn.Tanh()
@@ -53,13 +54,12 @@ import sys
 
 # plt.show()
 
-e = torch.tensor(0.5)
-alpha = torch.ones(5)
-delta = torch.tensor(2)
+with open('./config.json') as f:
+    config = json.load(f)
 
-print(5-alpha)
+order = config['order']
+name = config['name']
+data = config['data']
+fig_path = config['fig_path']
 
-phi = torch.div(e, torch.pow(input=delta, exponent=(1-alpha)))
-
-print(phi)
-
+print(config)
