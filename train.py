@@ -3,6 +3,7 @@ import torch
 from torch import nn
 import sys
 
+
 class TrainingHistory:
 
     def __init__(self):
@@ -23,9 +24,11 @@ def train(model: nn.Module,
           grad_clip=30):
 
     history = TrainingHistory()
-    train_loader = torch.utils.data.DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(
+        dataset=train_set, batch_size=batch_size, shuffle=True)
     if optimizer == 'Adam':
-        opti = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=0.1)
+        opti = torch.optim.Adam(
+            model.parameters(), lr=learning_rate, weight_decay=0.1)
     else:
         print('Unexpected Optimizer Type!')
         sys.exit(-1)
@@ -78,4 +81,3 @@ def train(model: nn.Module,
         last_loss = train_loss
 
     return history
-

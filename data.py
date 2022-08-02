@@ -61,7 +61,8 @@ class MyData:
 
         # d_init = d_out[:, 0]
         # dataset = Data.TensorDataset(torch.tensor(d_in), torch.tensor(d_init), torch.tensor(d_out))
-        dataset = Data.TensorDataset(torch.tensor(d_in), torch.tensor(d_out), torch.tensor(d_out))
+        dataset = Data.TensorDataset(torch.tensor(
+            d_in), torch.tensor(d_out), torch.tensor(d_out))
 
         return dataset
 
@@ -82,7 +83,8 @@ class MyData:
         data_dict = scio.loadmat(path)
         d_in = data_dict.get("u")
         d_out = data_dict.get("y")
-        dataset = Data.TensorDataset(torch.FloatTensor(d_in), torch.FloatTensor(d_out), torch.FloatTensor(d_out))
+        dataset = Data.TensorDataset(torch.FloatTensor(
+            d_in), torch.FloatTensor(d_out), torch.FloatTensor(d_out))
 
         return dataset
 
@@ -142,13 +144,13 @@ class MyData:
         return dataset
 
     @staticmethod
-    def get_case_data(name:str):
-        len_dict = {'fd07_outer':25,
-                    'fd21_outer':41,
-                    'fd07_inner':52,
-                    'fd14_inner':39,
-                    'fd21_inner':63,
-                    'fd28_inner':56
+    def get_case_data(name: str):
+        len_dict = {'fd07_outer': 25,
+                    'fd21_outer': 41,
+                    'fd07_inner': 52,
+                    'fd14_inner': 39,
+                    'fd21_inner': 63,
+                    'fd28_inner': 56
                     }
         length = len_dict.get(name)
         train_u_name = '../data/case_data/train/train_u_' + name + '.pt'
@@ -160,10 +162,10 @@ class MyData:
         test_u = torch.load(test_u_name)
         test_y = torch.load(test_y_name)
         train_set = Data.TensorDataset(train_u.cuda(),
-                                        train_y.cuda(),
-                                        train_y.cuda())
+                                       train_y.cuda(),
+                                       train_y.cuda())
         test_set = Data.TensorDataset(test_u.cuda(),
-                                        test_y.cuda(),
-                                        test_y.cuda())
+                                      test_y.cuda(),
+                                      test_y.cuda())
 
         return train_set, test_set, length

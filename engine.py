@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from data import MyData
 import sys
 
+
 class StateModel(nn.Module):
 
     def __init__(self, order, in_dim=1, out_dim=1, observer=False, activation='Tanh', device=torch.device('cpu')):
@@ -56,6 +57,7 @@ class StateModel(nn.Module):
         # out5 = self.state_layer5(out4)
         return out1
 
+
 def main():
     EPOCH = 250
     BATCH_SIZE = 1
@@ -64,10 +66,11 @@ def main():
     assert len(sys.argv) == 4
     order = int(sys.argv[1])
     name = sys.argv[2]  # 'test_07_tanh_7_4'
-    data = sys.argv[3] # 'fd07_outer'
+    data = sys.argv[3]  # 'fd07_outer'
 
     # start with main function
-    model = StateModel(order, in_dim=2, out_dim=1, observer=False, activation='None', device=device)
+    model = StateModel(order, in_dim=2, out_dim=1,
+                       observer=False, activation='None', device=device)
     print('Number of parameters: ', model.count_parameters())
     # model = model.cuda(device)
     criterion = RMSELoss()
@@ -80,7 +83,7 @@ def main():
     # training
     train_history = train(model,
                           criterion,
-                          r2_loss,  
+                          r2_loss,
                           epoch=EPOCH,
                           train_set=train_set,
                           batch_size=BATCH_SIZE,
@@ -102,9 +105,12 @@ def main():
     plt.savefig('../figs/test/' + name + '_loss', dpi=300)
 
     # evaluation
-    val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(model, test_set, criterion, num_data=4, origin=True, obs=False, show=True, fig_num=1)
-    print('validation loss with obs = ', val_loss_obs, '\nR2 loss with obs = ', val_r2_obs)
-    print('validation loss wo obs = ', val_loss_wo, '\nR2 loss wo obs = ', val_r2_wo)
+    val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(
+        model, test_set, criterion, num_data=4, origin=True, obs=False, show=True, fig_num=1)
+    print('validation loss with obs = ', val_loss_obs,
+          '\nR2 loss with obs = ', val_r2_obs)
+    print('validation loss wo obs = ', val_loss_wo,
+          '\nR2 loss wo obs = ', val_r2_wo)
     plt.savefig('../figs/test/' + name + '_val', dpi=300)
 
     plt.show()

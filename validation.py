@@ -11,11 +11,12 @@ def validation(model: nn.Module,
                val_set: torch.utils.data.TensorDataset,
                criterion: nn.Module,
                num_data=5,
-               origin=False, # print without observer result
-               obs=False, # print observer result
+               origin=False,  # print without observer result
+               obs=False,  # print observer result
                show=False,
                fig_num=1):
-    val_loader = torch.utils.data.DataLoader(dataset=val_set, batch_size=1, shuffle=False)
+    val_loader = torch.utils.data.DataLoader(
+        dataset=val_set, batch_size=1, shuffle=False)
     if show:
         fig = plt.figure(fig_num)
         fig.set_size_inches(12, 7, forward=True)
@@ -37,7 +38,7 @@ def validation(model: nn.Module,
             temp_loss = criterion(pred.cuda(), batch_y).item()
             temp_r2 = r2_loss(pred.cuda(), batch_y)
             val_loss_wo.append(temp_loss)
-            val_r2_wo.append(temp_r2)  
+            val_r2_wo.append(temp_r2)
 
         if show:
             assert idx <= num_data
@@ -77,7 +78,8 @@ if __name__ == '__main__':
 
     criterion = RMSELoss()
 
-    val_loss, val_r2 = validation(model, val_set, criterion, num_data=4, show=True, fig_num=0)
+    val_loss, val_r2 = validation(
+        model, val_set, criterion, num_data=4, show=True, fig_num=0)
     plt.xlabel('Timestep')
 
     plt.show()

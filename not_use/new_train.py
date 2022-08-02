@@ -1,4 +1,4 @@
-from model import StateModel, TrainingHistory
+from not_use.model import StateModel, TrainingHistory
 from neurons import StateNeuronSep
 from loss_func import RMSELoss, r2_loss
 from validation import validation

@@ -2,8 +2,10 @@ import numpy as np
 import torch
 from torch import nn
 
+
 def non_act(x):
     return x
+
 
 activ_dict = {'ReLU': nn.ReLU(),
               'Tanh': nn.Tanh(),
@@ -20,12 +22,18 @@ class StateNeuron(nn.Module):
         self.order = order
         self.inp_dim = in_dim
         self.out_dim = out_dim
-        self.weight_a = nn.Parameter(torch.ones((self.order, self.order), device=device))
-        self.weight_b = nn.Parameter(torch.ones((self.order, self.inp_dim), device=device))
-        self.weight_c = nn.Parameter(torch.ones((self.out_dim, self.order), device=device))
-        self.weight_d = nn.Parameter(torch.ones((self.out_dim, self.inp_dim), device=device))
-        self.weight_l = nn.Parameter(torch.ones((self.order, 1), device=device))
-        self.weight_alpha = nn.Parameter(torch.ones((self.order, 1), device=device))
+        self.weight_a = nn.Parameter(torch.ones(
+            (self.order, self.order), device=device))
+        self.weight_b = nn.Parameter(torch.ones(
+            (self.order, self.inp_dim), device=device))
+        self.weight_c = nn.Parameter(torch.ones(
+            (self.out_dim, self.order), device=device))
+        self.weight_d = nn.Parameter(torch.ones(
+            (self.out_dim, self.inp_dim), device=device))
+        self.weight_l = nn.Parameter(
+            torch.ones((self.order, 1), device=device))
+        self.weight_alpha = nn.Parameter(
+            torch.ones((self.order, 1), device=device))
         self.weight_delta = nn.Parameter(torch.tensor(0.5, device=device))
         self.activation = activ_dict.get(activation)
         self.transfer_gpu = False
@@ -37,14 +45,13 @@ class StateNeuron(nn.Module):
     def reset_parameter(self):
         for weight in self.parameters():
             nn.init.uniform_(weight, -0.7, 0.7)
-    
+
     def nonlinear(self, error):
         # fal function
         if(torch.abs(error) <= self.weight_delta):
             return torch.div(error, torch.pow(input=self.weight_delta, exponent=(1-self.weight_alpha)))
         else:
             return torch.pow(input=torch.abs(error), exponent=self.weight_alpha) * torch.sign(error)
-
 
     def forward(self, u, y_obs=None):
         if u.ndim > 2:
@@ -67,12 +74,16 @@ class StateNeuron(nn.Module):
         for i in range(self.seq_len):
             nn.init.uniform_(noise, 0, 0.1)
             if self.inp_dim > 1:
-                y_t = torch.mm(self.weight_c, hidden) + torch.mm(self.weight_d, u[:, [i]]) + noise
-                x_t1 = torch.mm(self.weight_a, hidden) + torch.mm(self.weight_b, u[:, [i]])
+                y_t = torch.mm(self.weight_c, hidden) + \
+                    torch.mm(self.weight_d, u[:, [i]]) + noise
+                x_t1 = torch.mm(self.weight_a, hidden) + \
+                    torch.mm(self.weight_b, u[:, [i]])
             else:
-                y_t = torch.mm(self.weight_c, hidden) + self.weight_d * u[:, i] + noise
+                y_t = torch.mm(self.weight_c, hidden) + \
+                    self.weight_d * u[:, i] + noise
                 # y_t = torch.mm(self.normal_c, hidden)
-                x_t1 = torch.mm(self.weight_a, hidden) + self.weight_b * u[:, i]
+                x_t1 = torch.mm(self.weight_a, hidden) + \
+                    self.weight_b * u[:, i]
             if y_obs is not None:
                 x_t1 += self.weight_l * (y_obs[0, i] - y_t)
                 # x_t1 += self.weight_l * self.nonlinear(y_obs[0, i] - y_t)
@@ -106,7 +117,6 @@ class StateNeuron(nn.Module):
         return y
 
 
-
 class StateNeuronSep(nn.Module):
     def __init__(self, order, in_dim=1, out_dim=None, activation='Tanh', device=torch.device('cpu')):
         super(StateNeuronSep, self).__init__()
@@ -117,12 +127,17 @@ class StateNeuronSep(nn.Module):
         if out_dim is not None:
             self.out_dim = out_dim
             self.observer = True
-        self.weight_a = nn.Parameter(torch.ones((self.order, self.order), device=device))
-        self.weight_b = nn.Parameter(torch.ones((self.order, self.inp_dim), device=device))
+        self.weight_a = nn.Parameter(torch.ones(
+            (self.order, self.order), device=device))
+        self.weight_b = nn.Parameter(torch.ones(
+            (self.order, self.inp_dim), device=device))
         if self.observer:
-            self.weight_c = nn.Parameter(torch.ones((self.out_dim, self.order), device=device))
-            self.weight_d = nn.Parameter(torch.ones((self.out_dim, self.inp_dim), device=device))
-            self.weight_l = nn.Parameter(torch.ones((self.order, 1), device=device))
+            self.weight_c = nn.Parameter(torch.ones(
+                (self.out_dim, self.order), device=device))
+            self.weight_d = nn.Parameter(torch.ones(
+                (self.out_dim, self.inp_dim), device=device))
+            self.weight_l = nn.Parameter(
+                torch.ones((self.order, 1), device=device))
         self.activation = activ_dict.get(activation)
         self.transfer_gpu = False
         self.device = device
@@ -156,11 +171,15 @@ class StateNeuronSep(nn.Module):
         if self.observer:
             for i in range(self.seq_len):
                 if self.inp_dim > 1:
-                    y_t = torch.mm(self.weight_c, hidden) + torch.mm(self.weight_d, u[:, [i]])
-                    x_t1 = torch.mm(self.weight_a, hidden) + torch.mm(self.weight_b, u[:, [i]])
+                    y_t = torch.mm(self.weight_c, hidden) + \
+                        torch.mm(self.weight_d, u[:, [i]])
+                    x_t1 = torch.mm(self.weight_a, hidden) + \
+                        torch.mm(self.weight_b, u[:, [i]])
                 else:
-                    y_t = torch.mm(self.weight_c, hidden) + self.weight_d * u[:, i] + noise
-                    x_t1 = torch.mm(self.weight_a, hidden) + self.weight_b * u[:, i]
+                    y_t = torch.mm(self.weight_c, hidden) + \
+                        self.weight_d * u[:, i] + noise
+                    x_t1 = torch.mm(self.weight_a, hidden) + \
+                        self.weight_b * u[:, i]
                 if y_obs is not None:
                     x_t1 += self.weight_l * (y_obs[0, i] - y_t)
                 hidden = x_t1
@@ -172,12 +191,14 @@ class StateNeuronSep(nn.Module):
         else:
             for i in range(self.seq_len):
                 if self.inp_dim > 1:
-                    x_t1 = torch.mm(self.weight_a, hidden) + torch.mm(self.weight_b, u[:, [i]])
+                    x_t1 = torch.mm(self.weight_a, hidden) + \
+                        torch.mm(self.weight_b, u[:, [i]])
                 else:
-                    x_t1 = torch.mm(self.weight_a, hidden) + self.weight_b * u[:, i]
+                    x_t1 = torch.mm(self.weight_a, hidden) + \
+                        self.weight_b * u[:, i]
                 hidden = x_t1
                 if i == 0:
                     x_hat = x_t1
                 else:
                     x_hat = torch.cat((x_hat, x_t1), 1)
-            return (self.activation(x_hat) * 3 , y_obs)
+            return (self.activation(x_hat) * 3, y_obs)
