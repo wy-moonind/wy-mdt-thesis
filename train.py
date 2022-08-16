@@ -20,7 +20,7 @@ def train(model: nn.Module,
           val_set=None,
           batch_size=1,
           optimizer='Adam',
-          learning_rate=0.0005,
+          learning_rate=1e-3,
           grad_clip=30):
 
     history = TrainingHistory()
@@ -33,6 +33,7 @@ def train(model: nn.Module,
         print('Unexpected Optimizer Type!')
         sys.exit(-1)
     last_loss = 1e20
+    last_r2 = -1e20
     patience = 3
     trigger_times = 0
     for eph in range(epoch):
@@ -71,13 +72,13 @@ def train(model: nn.Module,
             print('Validation loss = ', val_loss, 'R2 loss = ', val_r2)
 
         # Early-stopping
-        if train_loss > last_loss:
+        if train_r2 < last_r2:
             trigger_times += 1
             if trigger_times >= patience:
                 print('Early stopping!\nStart to test process.')
                 return history
         else:
             trigger_times = 0
-        last_loss = train_loss
+        last_r2 = train_r2
 
     return history

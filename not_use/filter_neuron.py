@@ -84,6 +84,28 @@ class PassFilter(nn.Module):
 def normalization(data):
     return (data - min(data)) / (max(data) - min(data))
 
+def hidden_forward(self, u, y_init):
+        self.seq_len = u.shape[1]
+        y = torch.zeros((1, self.seq_len), dtype=float)
+        noise1 = torch.FloatTensor(3, 1)
+        noise2 = torch.FloatTensor(1)
+        u = u.float()
+        y_init = y_init.float()
+        hidden = torch.FloatTensor(self.order, 1)
+        u = u.view(1, self.seq_len)
+        nn.init.constant_(hidden, 0)
+        for i in range(self.seq_len):
+            # nn.init.uniform_(noise1, 0, 0.1)
+            # nn.init.uniform_(noise2, 0, 0.1)
+            x_t1 = torch.mm(self.weight_a, hidden) + self.weight_b * u[:, i]
+            y_t = torch.mm(self.weight_c, hidden) + self.weight_d * u[:, i]
+            # if i == 0:
+            #     x_t1 += self.weight_l1 * y_init
+            #     y_t += y_init * self.weight_l2
+            hidden = x_t1
+            y[0, i] = y_t
+        return y
+
 
 def main():
     testdata = np.load("./new_data/train/lowpass_train_2.npy")
