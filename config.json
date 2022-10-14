@@ -1,6 +1,6 @@
 {
-    "order": 15,
-    "name": "outer21_15_3_specialnl",
+    "order": 7,
+    "name": "outer21_7_parallel",
     "data": "fd21_outer",
-    "fig_path": "../figs/outer21/"
+    "fig_path": "../figs/parallel/"
 }

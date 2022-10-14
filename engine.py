@@ -1,4 +1,5 @@
-from neurons import StateNeuron, StateSpace
+from turtle import forward
+from neurons import StateNeuron, StateSpace, AvgLayer
 from validation import validation
 from train import train
 from loss_func import RMSELoss, r2_loss
@@ -9,6 +10,46 @@ import matplotlib.pyplot as plt
 from data import MyData
 import sys
 import json
+
+
+class ParallelModel(nn.Module):
+
+    def __init__(self, order, in_dim=1, out_dim=1, activation='Tanh', device=torch.device('cpu')):
+        super(ParallelModel, self).__init__()
+        self.order = order
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+        self.observer = True
+        self.activation = activation
+        self.acti = nn.Tanh()
+        self.state_layer1 = StateNeuron(self.order,
+                                        in_dim=self.in_dim,
+                                        out_dim=self.out_dim,
+                                        observer=True,
+                                        activation=self.activation,
+                                        device=device)
+        self.state_layer2 = StateNeuron(self.order,
+                                        in_dim=self.in_dim,
+                                        out_dim=self.out_dim,
+                                        observer=True,
+                                        activation=self.activation,
+                                        device=device)
+        self.avg_layer = AvgLayer()
+
+    def count_parameters(self):
+        total_num = sum(p.numel() for p in self.parameters())
+        trainable_num = sum(p.numel()
+                            for p in self.parameters() if p.requires_grad)
+        return {'Total': total_num, 'Trainable': trainable_num}
+
+    def forward(self, x, y_obs=None):
+        out1 = self.state_layer1(x, y_obs=y_obs)
+        out2 = self.state_layer2(x, y_obs=y_obs)
+        combined = torch.cat((out1, out2), 0)
+        out = self.avg_layer(combined) # 这一步对m层n维的结果取平均，重新得到[1, n]的结果
+
+        return self.acti(out)
+
 
 
 class StateModel(nn.Module):
@@ -87,8 +128,11 @@ def main():
     fig_path = config['fig_path']
 
     # start with main function
-    model = StateModel(order, in_dim=2, out_dim=1,
-                       observer=True, activation='None', device=device)
+    # model = StateModel(order, in_dim=2, out_dim=1,
+    #                    observer=True, activation='None', device=device)
+
+    model = ParallelModel(order, in_dim=2, out_dim=1, device=device)
+
     print('Number of parameters: ', model.count_parameters())
     criterion = RMSELoss()
 
@@ -109,8 +153,14 @@ def main():
 
     # model_name = '../models/test/' + name + '.pt'
     # torch.save(model, model_name)
+    is_good = input("Continue validation? 1 to continue, 2 abort: ")
+    is_good = int(is_good)
+    if is_good == 1:
+        pass
+    else:
+        sys.exit(0)
     # plot training curve
-    plt.figure(0)
+    train_fig = plt.figure(0)
     plt.plot(train_history.train_loss)
     plt.plot(train_history.train_r2)
     plt.ylim(0, 1)
@@ -118,7 +168,7 @@ def main():
     plt.xlabel('Epoch')
     plt.title('Training Process')
     plt.grid(True)
-    plt.savefig(fig_path + name + '_loss', dpi=300)
+    train_fig.savefig(fig_path + name + '_loss', dpi=300)
 
     # evaluation
     val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(

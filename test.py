@@ -7,6 +7,8 @@ from torch import nn
 import sys
 import json
 
+from engine import ParallelModel
+
 # points = torch.linspace(-3, 3, 100)
 # tanh = nn.Tanh()
 # relu = nn.ReLU()
@@ -54,12 +56,14 @@ import json
 
 # plt.show()
 
-with open('./config.json') as f:
-    config = json.load(f)
+# with open('./config.json') as f:
+#     config = json.load(f)
 
-order = config['order']
-name = config['name']
-data = config['data']
-fig_path = config['fig_path']
+# order = config['order']
+# name = config['name']
+# data = config['data']
+# fig_path = config['fig_path']
 
-print(config)
+# print(config)
+
+model = ParallelModel(5, in_dim=2, out_dim=1)

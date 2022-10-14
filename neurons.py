@@ -15,6 +15,14 @@ activ_dict = {'ReLU': nn.ReLU(),
               'None': non_act}
 
 
+class AvgLayer(nn.Module):
+    def __init__(self):
+        super(AvgLayer, self).__init__()
+
+    def forward(self, x):
+
+        return torch.mean(x, dim=0, keepdim=True)
+
 class StateNeuron(nn.Module):
     def __init__(self, order, in_dim=1, out_dim=1, observer=False, activation='Tanh', device=torch.device('cpu')):
         super(StateNeuron, self).__init__()
@@ -52,7 +60,6 @@ class StateNeuron(nn.Module):
     def nonlinear(self, error):
         # fal function
         assert self.observer
-        # fal function
         if(torch.abs(error) <= self.fixed_delta):
             return torch.div(error, torch.pow(input=self.fixed_delta, exponent=(1-self.weight_alpha)))
         else:
