@@ -201,6 +201,30 @@ def plot_sth():
 
 
 if __name__ == '__main__':
-    path = '../data/case_fd28_inner.mat'
-    case_data(path)
+    path = '../data/femto_data/train/'
+    data = scio.loadmat(path+'femto_train.mat')
+    u1 = data.get('u1')
+    u2 = data.get('u2')
+    u3 = data.get('u3')
+
+    d1 = data.get('d1')
+    d2 = data.get('d2')
+    d3 = data.get('d3')
+
+    print(u1.shape, d1.shape)
+    len1 = d1.shape[0]
+    len2 = d2.shape[0]
+    len3 = d3.shape[0]
+
+    u1_all, d1_all = split_data(u1, d1, len1)
+    u2_all, d2_all = split_data(u2, d2, len2)
+    u3_all, d3_all = split_data(u3, d3, len3)
+
+    print(len(u1_all), len(d2_all), u3_all[0].shape, d1_all[0].shape)
+
+    u_train = u1_all + u2_all + u3_all
+    y_train = d1_all + d2_all + d3_all
+
+    torch.save(u_train, '../data/femto_data/train/train_u_all.pt')
+    torch.save(y_train, '../data/femto_data/train/train_y_all.pt')
     

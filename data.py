@@ -169,3 +169,22 @@ class MyData:
                                       test_y.cuda())
 
         return train_set, test_set, length
+
+    @staticmethod
+    def get_femto_data():
+        train_u_path = '../data/femto_data/train/train_u_all.pt'
+        train_y_path = '../data/femto_data/train/train_y_all.pt'
+        test_u_path = '../data/femto_data/test/test_u_all.pt'
+        test_y_path = '../data/femto_data/test/test_u_all.pt'
+        train_u = torch.load(train_u_path)
+        train_y = torch.load(train_y_path)
+        test_u = torch.load(test_u_path)
+        test_y = torch.load(test_y_path)
+        train_set = Data.TensorDataset(train_u.cuda(),
+                                       train_y.cuda(),
+                                       train_y.cuda())
+        test_set = Data.TensorDataset(test_u.cuda(),
+                                      test_y.cuda(),
+                                      test_y.cuda())
+        length = 89 + 75 + 85
+        return train_set, test_set, length
