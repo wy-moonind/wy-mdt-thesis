@@ -145,12 +145,15 @@ class MyData:
 
     @staticmethod
     def get_case_data(name: str):
-        len_dict = {'fd07_outer': 25,
-                    'fd21_outer': 41,
-                    'fd07_inner': 52,
-                    'fd14_inner': 39,
-                    'fd21_inner': 63,
-                    'fd28_inner': 56
+        len_dict = {'outer07': 25,
+                    'outer21': 41,
+                    'inner07': 52,
+                    'inner14': 39,
+                    'inner21': 63,
+                    'inner28': 56,
+                    'ball07': 40,
+                    'ball14': 42,
+                    'ball21': 48
                     }
         length = len_dict.get(name)
         train_u_name = '../data/case_data/train/train_u_' + name + '.pt'

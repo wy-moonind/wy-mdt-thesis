@@ -15,14 +15,6 @@ activ_dict = {'ReLU': nn.ReLU(),
               'None': non_act}
 
 
-class AvgLayer(nn.Module):
-    def __init__(self):
-        super(AvgLayer, self).__init__()
-
-    def forward(self, x):
-
-        return torch.mean(x, dim=0, keepdim=True)
-
 class StateNeuron(nn.Module):
     def __init__(self, order, in_dim=1, out_dim=1, observer=False, activation='Tanh', device=torch.device('cpu')):
         super(StateNeuron, self).__init__()
@@ -44,8 +36,8 @@ class StateNeuron(nn.Module):
                 torch.ones((self.order, 1), device=device))
             self.weight_alpha = nn.Parameter(
                 torch.ones((self.order, 1), device=device))
-            # self.weight_delta = nn.Parameter(torch.tensor(0.5, device=device))
-            self.fixed_delta = torch.tensor(0.5, device=device)
+            # self.fixed_delta = nn.Parameter(torch.tensor(0.5, device=device)) # trainable delta
+            self.fixed_delta = torch.tensor(0.5, device=device) # fixed delta
         self.activation = activ_dict.get(activation)
         self.transfer_gpu = False
         self.device = device

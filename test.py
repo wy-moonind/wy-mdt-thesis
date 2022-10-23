@@ -66,4 +66,9 @@ from engine import ParallelModel
 
 # print(config)
 
-model = ParallelModel(5, in_dim=2, out_dim=1)
+
+n = 3
+x = 999
+n_layers = x if n==1 else 2*n-2
+
+print(n_layers)

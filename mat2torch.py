@@ -9,6 +9,25 @@ import torch.utils.data as Data
 import matplotlib.pyplot as plt
 import sys
 
+class MapMinMaxApplier(object):
+    def __init__(self, slope, intercept):
+        self.slope = slope
+        self.intercept = intercept
+    def __call__(self, x):
+        return x * self.slope + self.intercept
+    def reverse(self, y):
+        return (y-self.intercept) / self.slope
+ 
+def mapminmax(x, ymin=-1, ymax=+1):
+	x = np.asanyarray(x)
+	xmax = x.max(axis=-1)
+	xmin = x.min(axis=-1)
+	if (xmax==xmin).any():
+		raise ValueError("some rows have no variation")
+	slope = ((ymax-ymin) / (xmax - xmin))
+	intercept = (-xmin*(ymax-ymin)/(xmax-xmin)) + ymin
+	ps = MapMinMaxApplier(slope, intercept)
+	return ps(x)
 
 def xjtu_data():
     u_dict = scio.loadmat('./bearing_data/xjtu/u_outer_all.mat')
@@ -159,10 +178,10 @@ def case_data(path:str):
 
     print(u_train.shape, u_test.shape)
 
-    torch.save(u_train, '../data/case_data/train/train_u_fd28_inner.pt')
-    torch.save(c_train, '../data/case_data/train/train_y_fd28_inner.pt')
-    torch.save(u_test, '../data/case_data/test/test_u_fd28_inner.pt')
-    torch.save(c_test, '../data/case_data/test/test_y_fd28_inner.pt')
+    torch.save(u_train, '../data/case_data/train/train_u_fd21_ball.pt')
+    torch.save(c_train, '../data/case_data/train/train_y_fd21_ball.pt')
+    torch.save(u_test, '../data/case_data/test/test_u_fd21_ball.pt')
+    torch.save(c_test, '../data/case_data/test/test_y_fd21_ball.pt')
 
     pass
 
@@ -201,30 +220,33 @@ def plot_sth():
 
 
 if __name__ == '__main__':
-    path = '../data/femto_data/train/'
-    data = scio.loadmat(path+'femto_train.mat')
-    u1 = data.get('u1')
-    u2 = data.get('u2')
-    u3 = data.get('u3')
+    # path = '../data/femto_data/train/'
+    # data = scio.loadmat(path+'femto_train_long.mat')
+    # u1 = data.get('u1')
+    # u2 = data.get('u2')
+    # u3 = data.get('u3')
 
-    d1 = data.get('d1')
-    d2 = data.get('d2')
-    d3 = data.get('d3')
+    # d1 = data.get('d1')
+    # d2 = data.get('d2')
+    # d3 = data.get('d3')
 
-    print(u1.shape, d1.shape)
-    len1 = d1.shape[0]
-    len2 = d2.shape[0]
-    len3 = d3.shape[0]
+    # print(u1.shape, d1.shape)
+    # len1 = d1.shape[0]
+    # len2 = d2.shape[0]
+    # len3 = d3.shape[0]
 
-    u1_all, d1_all = split_data(u1, d1, len1)
-    u2_all, d2_all = split_data(u2, d2, len2)
-    u3_all, d3_all = split_data(u3, d3, len3)
+    # u1_all, d1_all = split_data(u1, d1, len1)
+    # u2_all, d2_all = split_data(u2, d2, len2)
+    # u3_all, d3_all = split_data(u3, d3, len3)
+    # print(type(d1_all[0]), type(u1_all[0]))
 
-    print(len(u1_all), len(d2_all), u3_all[0].shape, d1_all[0].shape)
+    # print(len(u1_all), len(d2_all), u3_all[0].shape, d1_all[0].shape)
 
-    u_train = u1_all + u2_all + u3_all
-    y_train = d1_all + d2_all + d3_all
+    # u_train = u1_all + u2_all + u3_all
+    # y_train = d1_all + d2_all + d3_all
 
-    torch.save(u_train, '../data/femto_data/train/train_u_all.pt')
-    torch.save(y_train, '../data/femto_data/train/train_y_all.pt')
+    # torch.save(u_train, '../data/femto_data/train/train_u_all.pt')
+    # torch.save(y_train, '../data/femto_data/train/train_y_all.pt')
+    path = '../data/case_fd21_ball.mat'
+    case_data(path)
     

@@ -50,3 +50,29 @@ class StateModel(nn.Module):
         # out4 = self.state_layer4(out3)
         # out5 = self.state_layer5(out4)
         return out1
+
+        # self.state_layer2 = StateNeuron(self.order,
+        #                                 in_dim=2,
+        #                                 out_dim=4,
+        #                                 observer=False,
+        #                                 device=device)
+        # self.state_layer3 = StateNeuron(self.order,
+        #                                 in_dim=4,
+        #                                 out_dim=self.out_dim,
+        #                                 observer=True,
+        #                                 device=device)
+        # self.state_layer4 = StateNeuron(self.order,
+        #                                 in_dim=8,
+        #                                 out_dim=10,
+        #                                 observer=False,
+        #                                 device=device)
+        # self.state_layer5 = StateNeuron(self.order,
+        #                                 in_dim=10,
+        #                                 out_dim=self.out_dim,
+        #                                 observer=True,
+        #                                 device=device)
+
+        # out2 = self.state_layer2(out1)
+        # out3 = self.state_layer3(out2, y_obs=y_obs)
+        # out4 = self.state_layer4(out3)
+        # out5 = self.state_layer5(out4, y_obs=y_obs)
