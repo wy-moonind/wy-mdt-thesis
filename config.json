@@ -1,8 +1,8 @@
 {
-    "order": 9,
-    "layer": 2,
+    "order": 15,
+    "layer": 5,
     "structure":"parallel",
-    "note":"_",
-    "data": "outer07",
-    "fig_path": "../figs/outer07/"
+    "note":"time",
+    "data": "outer21",
+    "fig_path": "../figs/outer21/"
 }

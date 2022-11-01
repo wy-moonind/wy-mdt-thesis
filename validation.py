@@ -20,7 +20,7 @@ def validation(model: nn.Module,
     if show:
         fig = plt.figure(fig_num)
         fig.set_size_inches(12, 7, forward=True)
-        fig.suptitle('Randomly selected validation data')
+        # fig.suptitle('Randomly selected validation data')
     if origin:
         val_loss_wo = []
         val_r2_wo = []

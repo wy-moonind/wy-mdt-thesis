@@ -67,3 +67,22 @@ def cal_time():
     # do something
     end = datetime.datetime.now()
     print("time for backwarding: ", (end - start).microseconds)
+
+def translate_params(params, candidate):
+    order_candidate = candidate[0]
+    layer_candidate = candidate[1]
+    layer, order = None, None
+    for j in range(len(order_candidate)):
+        if (j / len(order_candidate)) <= params[0] <= ((j + 1) / len(order_candidate)):
+            order = order_candidate[j]
+        elif params[0] == 1:
+            order = order_candidate[-1]
+    for i in range(len(layer_candidate)):
+        if (i / len(layer_candidate)) <= params[1] <= ((i + 1) / len(layer_candidate)):
+            layer = layer_candidate[i]
+        elif params[1] == 1:
+            layer = layer_candidate[-1]
+    assert layer in layer_candidate
+    assert order in order_candidate
+
+    return order, layer

@@ -10,6 +10,7 @@ from torch import nn
 import matplotlib.pyplot as plt
 from data import MyData
 import sys
+import os
 import json
 
 
@@ -68,7 +69,9 @@ class ParallelModel(nn.Module):
                                             activation=self.activation,
                                             device=device)
         self.fully_connected = nn.Linear(
-            in_features=self.seq_len*self.layers, out_features=self.seq_len).to(device)
+            in_features=self.seq_len*self.layers, out_features=self.seq_len, bias=False).to(device)
+        for weight in self.fully_connected.parameters():
+            nn.init.uniform_(weight, 0, 0.5)
 
     def count_parameters(self):
         total_num = sum(p.numel() for p in self.parameters())
@@ -180,10 +183,13 @@ def main():
                            observer=True, activation='None', device=device)
     elif structure == 'parallel':
         model = ParallelModel(order, in_dim=2, out_dim=1, layers=layer,
-                              seq_len=112, activation="Tanh", device=device)
+                              seq_len=112, activation="None", device=device)
     else:
         print('Unrecognized model structure:', structure)
         sys.exit(-2)
+
+    # for name, param in model.named_parameters():
+    #     print(name, param.size())
 
     print('Number of parameters: ', model.count_parameters())
     criterion = RMSELoss()
@@ -200,7 +206,7 @@ def main():
                           train_set=train_set,
                           batch_size=BATCH_SIZE,
                           optimizer='Adam',
-                          learning_rate=0.001,
+                          learning_rate=0.0005,
                           grad_clip=30)
 
     # model_name = '../models/test/' + name + '.pt'
@@ -208,20 +214,22 @@ def main():
     print('Name of the model: ', name)
     is_good = input("Continue validation? 1 to continue, 2 abort: ")
     is_good = int(is_good)
-    if is_good == 1:
-        pass
-    else:
+    if is_good == 2:
         sys.exit(0)
     # plot training curve
     train_fig = plt.figure(0)
     plt.plot(train_history.train_loss)
     plt.plot(train_history.train_r2)
-    plt.ylim(0, 1)
+    plt.ylim(0, 1.5)
     plt.legend(['Training loss', 'Training R2-value'])
     plt.xlabel('Epoch')
     plt.title('Training Process')
     plt.grid(True)
+    if os.path.exists(fig_path + name + '_loss.png'):
+        print('found old image, removing')
+        os.remove(fig_path + name + '_loss.png')
     train_fig.savefig(fig_path + name + '_loss', dpi=300)
+    plt.close()
 
     # evaluation
     val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(
@@ -231,9 +239,12 @@ def main():
     print('validation loss wo obs = ', val_loss_wo,
           '\nR2 loss wo obs = ', val_r2_wo)
     print(config)
+    if os.path.exists(fig_path + name + '_val.png'):
+        print('found old image, removing')
+        os.remove(fig_path + name + '_val.png')
     plt.savefig(fig_path + name + '_val', dpi=300)
-
-    plt.show()
+    plt.close()
+    # plt.show()
 
     return 0
 
