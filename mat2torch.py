@@ -220,33 +220,42 @@ def plot_sth():
 
 
 if __name__ == '__main__':
-    # path = '../data/femto_data/train/'
-    # data = scio.loadmat(path+'femto_train_long.mat')
-    # u1 = data.get('u1')
-    # u2 = data.get('u2')
-    # u3 = data.get('u3')
+    path = '../data/femto_data/train/'
+    data = scio.loadmat(path+'femto_train_long.mat')
+    u1 = data.get('u1')
+    u2 = data.get('u2')
+    u3 = data.get('u3')
 
-    # d1 = data.get('d1')
-    # d2 = data.get('d2')
-    # d3 = data.get('d3')
+    d1 = data.get('d1')
+    d2 = data.get('d2')
+    d3 = data.get('d3')
 
-    # print(u1.shape, d1.shape)
-    # len1 = d1.shape[0]
-    # len2 = d2.shape[0]
-    # len3 = d3.shape[0]
+    print(u1.shape, d1.shape)
+    len1 = d1.shape[0]
+    len2 = d2.shape[0]
+    len3 = d3.shape[0]
 
-    # u1_all, d1_all = split_data(u1, d1, len1)
-    # u2_all, d2_all = split_data(u2, d2, len2)
-    # u3_all, d3_all = split_data(u3, d3, len3)
-    # print(type(d1_all[0]), type(u1_all[0]))
+    u1_all, d1_all = split_data(u1, d1, len1)
+    # u1_show = [u1_all[1]]
+    # d1_show = [d1_all[1]]
+    u2_all, d2_all = split_data(u2, d2, len2)
+    # u2_show = [u2_all[1]]
+    # d2_show = [d2_all[1]]
+    u3_all, d3_all = split_data(u3, d3, len3)
+    # u3_show = [u3_all[1]]
+    # d3_show = [d3_all[1]]
+    # u_show = u1_show + u2_show + u3_show
+    # y_show = d1_show + d2_show + d3_show
+    # print(len(u_show), len(y_show))
+    # print(u_show[1].shape, y_show[1].shape)
 
-    # print(len(u1_all), len(d2_all), u3_all[0].shape, d1_all[0].shape)
+    u_train = u1_all + u2_all + u3_all
+    y_train = d1_all + d2_all + d3_all
 
-    # u_train = u1_all + u2_all + u3_all
-    # y_train = d1_all + d2_all + d3_all
-
-    # torch.save(u_train, '../data/femto_data/train/train_u_all.pt')
-    # torch.save(y_train, '../data/femto_data/train/train_y_all.pt')
-    path = '../data/case_fd21_ball.mat'
-    case_data(path)
+    torch.save(torch.FloatTensor(u_train), '../data/femto_data/train/train_u_all.pt')
+    torch.save(torch.FloatTensor(y_train), '../data/femto_data/train/train_y_all.pt')
+    # torch.save(torch.FloatTensor(u_show), '../data/femto_data/test/show_u_all.pt')
+    # torch.save(torch.FloatTensor(y_show), '../data/femto_data/test/show_y_all.pt')
+    # path = '../data/case_fd21_ball.mat'
+    # case_data(path)
     

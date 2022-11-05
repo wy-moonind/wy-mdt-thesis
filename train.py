@@ -10,6 +10,7 @@ class TrainingHistory:
         self.train_loss = []
         self.val_loss = []
         self.train_r2 = []
+        self.val_r2 = []
 
 
 def train(model: nn.Module,
@@ -51,25 +52,29 @@ def train(model: nn.Module,
             temp_r2 = metric(output, y)
 
             loss_per_step.append(loss.item())
+            if(torch.isnan(loss)):
+                print('NaN value')
             r2_per_step.append(temp_r2)
+            # print(step, ":", loss.item(), temp_r2)
             opti.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
 
             opti.step()
 
-        train_loss = sum(loss_per_step) / len(loss_per_step)
-        train_r2 = sum(r2_per_step) / len(r2_per_step)
+        train_loss = float(sum(loss_per_step) / len(loss_per_step))
+        train_r2 = float(sum(r2_per_step) / len(r2_per_step))
         history.train_loss.append(train_loss)
         history.train_r2.append(train_r2)
         print('Epoch ', eph + 1,
-              ' Training loss = ', train_loss)
+              '\nTraining loss = ', train_loss, '; train r2 = ', train_r2)
 
         # validation
         if val_set is not None:
-            val_loss, val_r2 = validation(model, val_set, criterion=criterion)
+            val_loss, val_r2, dump1, dump2 = validation(model, val_set, criterion=criterion, obs=True)
             history.val_loss.append(val_loss)
-            print('Validation loss = ', val_loss, 'R2 loss = ', val_r2)
+            history.val_r2.append(val_r2)
+            print('Validation loss = ', val_loss, '; val r2 = ', val_r2)
 
         # Early-stopping
         if train_r2 < last_r2:

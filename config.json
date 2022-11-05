@@ -1,8 +1,8 @@
 {
     "order": 15,
     "layer": 5,
-    "structure":"parallel",
-    "note":"time",
-    "data": "outer21",
-    "fig_path": "../figs/outer21/"
+    "structure":"serial",
+    "note":"final",
+    "data": "femto",
+    "fig_path": "../figs/femto/"
 }

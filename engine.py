@@ -12,6 +12,7 @@ from data import MyData
 import sys
 import os
 import json
+import datetime
 
 
 class ParallelModel(nn.Module):
@@ -124,6 +125,8 @@ class StateModel(nn.Module):
             self.state_space4 = StateSpace(8, in_dim=6, activation='None', device=device)
         if layers>=6:
             self.state_space5 = StateSpace(10, in_dim=8, activation='None', device=device)
+        if layers>=7:
+            self.state_space6 = StateSpace(12, in_dim=10, activation='None', device=device)
         last_in_dim = in_dim if layers==1 else 2*layers-2
         self.state_layer1 = StateNeuron(self.order,
                                         in_dim=last_in_dim,
@@ -151,6 +154,8 @@ class StateModel(nn.Module):
             out = self.state_space4(out)
         if self.layers >=6:
             out = self.state_space5(out)
+        if self.layers>=7:
+            out = self.state_space6(out)
         out = self.state_layer1(out if self.layers>1 else x, y_obs=y_obs)
         return out
 
@@ -195,22 +200,36 @@ def main():
     criterion = RMSELoss()
 
     data_gen = MyData()
-    train_set, test_set, train_size = data_gen.get_case_data(data)
+    if data == "femto":
+        train_set, test_set, train_size, show_set = data_gen.get_femto_data()
+    else:
+        train_set, test_set, train_size = data_gen.get_case_data(data)
     print("Dataset size: ", train_size)
+    train_set, val_set = torch.utils.data.random_split(train_set, [train_size-70, 70])
 
     # training
+    start = datetime.datetime.now()
     train_history = train(model,
                           criterion,
                           r2_loss,
                           epoch=EPOCH,
                           train_set=train_set,
+                          val_set=val_set,
                           batch_size=BATCH_SIZE,
                           optimizer='Adam',
                           learning_rate=0.0005,
                           grad_clip=30)
+    end = datetime.datetime.now()
+    print('Time for training: ', (end - start).seconds, 'seconds')
 
-    # model_name = '../models/test/' + name + '.pt'
-    # torch.save(model, model_name)
+    model_name = '../models/' + name + '.pt'
+    torch.save(model, model_name)
+    his_name = '../history/' + name + '.pt'
+    his = torch.tensor([train_history.train_loss, 
+                                    train_history.train_r2, 
+                                    train_history.val_loss, 
+                                    train_history.val_r2])
+    torch.save(his, his_name)
     print('Name of the model: ', name)
     is_good = input("Continue validation? 1 to continue, 2 abort: ")
     is_good = int(is_good)
@@ -220,29 +239,41 @@ def main():
     train_fig = plt.figure(0)
     plt.plot(train_history.train_loss)
     plt.plot(train_history.train_r2)
+    lgd = ['Training loss', 'Training R2-value']
+    if note == "final":
+        plt.plot(train_history.val_loss)
+        plt.plot(train_history.val_r2)
+        lgd.append("Validation loss")
+        lgd.append("Validation R2-value")
+    plt.legend(lgd)
     plt.ylim(0, 1.5)
-    plt.legend(['Training loss', 'Training R2-value'])
     plt.xlabel('Epoch')
     plt.title('Training Process')
     plt.grid(True)
     if os.path.exists(fig_path + name + '_loss.png'):
         print('found old image, removing')
         os.remove(fig_path + name + '_loss.png')
-    train_fig.savefig(fig_path + name + '_loss', dpi=300)
+    train_fig.savefig(fig_path + name + '_loss', dpi=300, bbox_inches='tight')
     plt.close()
 
     # evaluation
-    val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(
-        model, test_set, criterion, num_data=4, origin=False, obs=True, show=True, fig_num=1)
-    print('validation loss with obs = ', val_loss_obs,
-          '\nR2 loss with obs = ', val_r2_obs)
-    print('validation loss wo obs = ', val_loss_wo,
-          '\nR2 loss wo obs = ', val_r2_wo)
+    if data == "femto":
+        val_loss_real, val_r2_real, dump1, dump2 = validation(model, test_set, criterion=criterion, obs=True)
+        print("test loss:", val_loss_real, "test r2:", val_r2_real)
+        dump3, dump4, dump5, dump4 = validation(
+        model, show_set, criterion, num_data=3, origin=False, obs=True, show=True, fig_num=1)
+    else:
+        val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(
+            model, test_set, criterion, num_data=4, origin=False, obs=True, show=True, fig_num=1)
+        print('validation loss with obs = ', val_loss_obs,
+            '\nR2 loss with obs = ', val_r2_obs)
+        print('validation loss wo obs = ', val_loss_wo,
+            '\nR2 loss wo obs = ', val_r2_wo)
     print(config)
     if os.path.exists(fig_path + name + '_val.png'):
         print('found old image, removing')
         os.remove(fig_path + name + '_val.png')
-    plt.savefig(fig_path + name + '_val', dpi=300)
+    plt.savefig(fig_path + name + '_val', dpi=300, bbox_inches='tight')
     plt.close()
     # plt.show()
 

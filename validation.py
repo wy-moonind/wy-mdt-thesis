@@ -51,7 +51,7 @@ def validation(model: nn.Module,
             if origin:
                 plt.plot(pred.detach().numpy().T)
                 lgd_vec.append("prediction")
-            plt.legend(lgd_vec)
+            plt.legend(lgd_vec, loc="upper right")
             plt.ylabel('Acceleration')
             plt.grid(True)
     avg_val_loss_wo = None
@@ -67,19 +67,3 @@ def validation(model: nn.Module,
 
     return avg_val_loss_obs, avg_val_r2_obs, avg_val_loss_wo, avg_val_r2_wo
 
-
-if __name__ == '__main__':
-    model = torch.load('../models/case_fd21/case_layer3_order13.pt')
-    data_gen = MyData()
-    # dataset = data_gen.get_outer_data()
-    dataset = data_gen.get_case_data()
-
-    train_set, val_set = torch.utils.data.random_split(dataset, [41, 4])
-
-    criterion = RMSELoss()
-
-    val_loss, val_r2 = validation(
-        model, val_set, criterion, num_data=4, show=True, fig_num=0)
-    plt.xlabel('Timestep')
-
-    plt.show()

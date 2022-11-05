@@ -178,16 +178,23 @@ class MyData:
         train_u_path = '../data/femto_data/train/train_u_all.pt'
         train_y_path = '../data/femto_data/train/train_y_all.pt'
         test_u_path = '../data/femto_data/test/test_u_all.pt'
-        test_y_path = '../data/femto_data/test/test_u_all.pt'
+        test_y_path = '../data/femto_data/test/test_y_all.pt'
+        show_u_path = '../data/femto_data/test/show_u_all.pt'
+        show_y_path = '../data/femto_data/test/show_y_all.pt'
         train_u = torch.load(train_u_path)
         train_y = torch.load(train_y_path)
         test_u = torch.load(test_u_path)
         test_y = torch.load(test_y_path)
+        show_u = torch.load(show_u_path)
+        show_y = torch.load(show_y_path)
         train_set = Data.TensorDataset(train_u.cuda(),
                                        train_y.cuda(),
                                        train_y.cuda())
         test_set = Data.TensorDataset(test_u.cuda(),
                                       test_y.cuda(),
                                       test_y.cuda())
+        show_set = Data.TensorDataset(show_u.cuda(), 
+                                      show_y.cuda(), 
+                                      show_y.cuda())
         length = 89 + 75 + 85
-        return train_set, test_set, length
+        return train_set, test_set, length, show_set
