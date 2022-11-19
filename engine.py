@@ -74,6 +74,10 @@ class ParallelModel(nn.Module):
         for weight in self.fully_connected.parameters():
             nn.init.uniform_(weight, 0, 0.5)
 
+    def reset_parameter(self):
+        for weight in self.parameters():
+            nn.init.uniform_(weight, -0.5, 0.5)
+
     def count_parameters(self):
         total_num = sum(p.numel() for p in self.parameters())
         trainable_num = sum(p.numel()
@@ -134,6 +138,9 @@ class StateModel(nn.Module):
                                         observer=True,
                                         activation=self.activation,
                                         device=device)
+    def reset_parameter(self):
+        for weight in self.parameters():
+            nn.init.uniform_(weight, -0.5, 0.5)
 
     def count_parameters(self):
         total_num = sum(p.numel() for p in self.parameters())
@@ -165,7 +172,7 @@ class StateModel(nn.Module):
 # type: obs, nlobs, none
 
 def main():
-    EPOCH = 250
+    EPOCH = 20
     BATCH_SIZE = 1
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -201,11 +208,11 @@ def main():
 
     data_gen = MyData()
     if data == "femto":
-        train_set, test_set, train_size, show_set = data_gen.get_femto_data()
+        train_set, test_set, show_set = data_gen.get_femto_data()
     else:
-        train_set, test_set, train_size = data_gen.get_case_data(data)
-    print("Dataset size: ", train_size)
-    train_set, val_set = torch.utils.data.random_split(train_set, [train_size-70, 70])
+        train_set, test_set, show_set = data_gen.get_case_data(data)
+
+    train_set, val_set = torch.utils.data.random_split(train_set, [600-150, 150])
 
     # training
     start = datetime.datetime.now()
@@ -214,7 +221,7 @@ def main():
                           r2_loss,
                           epoch=EPOCH,
                           train_set=train_set,
-                          val_set=val_set,
+                        #   val_set=val_set,
                           batch_size=BATCH_SIZE,
                           optimizer='Adam',
                           learning_rate=0.0005,
@@ -222,14 +229,14 @@ def main():
     end = datetime.datetime.now()
     print('Time for training: ', (end - start).seconds, 'seconds')
 
-    model_name = '../models/' + name + '.pt'
-    torch.save(model, model_name)
-    his_name = '../history/' + name + '.pt'
-    his = torch.tensor([train_history.train_loss, 
-                                    train_history.train_r2, 
-                                    train_history.val_loss, 
-                                    train_history.val_r2])
-    torch.save(his, his_name)
+    # model_name = '../models/' + name + '.pt'
+    # torch.save(model, model_name)
+    # his_name = '../history/' + name + '.pt'
+    # his = torch.tensor([train_history.train_loss, 
+    #                                 train_history.train_r2, 
+    #                                 train_history.val_loss, 
+    #                                 train_history.val_r2])
+    # torch.save(his, his_name)
     print('Name of the model: ', name)
     is_good = input("Continue validation? 1 to continue, 2 abort: ")
     is_good = int(is_good)
@@ -237,48 +244,132 @@ def main():
         sys.exit(0)
     # plot training curve
     train_fig = plt.figure(0)
-    plt.plot(train_history.train_loss)
-    plt.plot(train_history.train_r2)
+    real_epoch = len(train_history.train_loss)
+    epoch_vec = [i+1 for i in range(real_epoch)]
+    # train_fig.set_size_inches(12/2.54, 8/2.54)
+    plt.plot(epoch_vec, train_history.train_loss)
+    plt.plot(epoch_vec, train_history.train_r2)
     lgd = ['Training loss', 'Training R2-value']
     if note == "final":
-        plt.plot(train_history.val_loss)
-        plt.plot(train_history.val_r2)
+        plt.plot(epoch_vec, train_history.val_loss)
+        plt.plot(epoch_vec, train_history.val_r2)
         lgd.append("Validation loss")
         lgd.append("Validation R2-value")
-    plt.legend(lgd)
+    plt.legend(lgd, loc="upper right")
     plt.ylim(0, 1.5)
-    plt.xlabel('Epoch')
-    plt.title('Training Process')
+    plt.xlabel('Epoch', fontsize=15)
+    plt.xticks(size=15)
+    plt.yticks(size=15)
+    # plt.title('Training Process', fontsize=15)
     plt.grid(True)
-    if os.path.exists(fig_path + name + '_loss.png'):
-        print('found old image, removing')
-        os.remove(fig_path + name + '_loss.png')
+    # if os.path.exists(fig_path + name + '_loss.png'):
+    #     print('found old image, removing')
+    #     os.remove(fig_path + name + '_loss.png')
     train_fig.savefig(fig_path + name + '_loss', dpi=300, bbox_inches='tight')
-    plt.close()
 
     # evaluation
+    val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(
+            model, test_set, criterion, origin=False, obs=True)
+    print('validation loss with obs = ', val_loss_obs,
+            '\nR2 loss with obs = ', val_r2_obs)
+    print('validation loss wo obs = ', val_loss_wo,
+            '\nR2 loss wo obs = ', val_r2_wo)
+    # plot show dataset
     if data == "femto":
-        val_loss_real, val_r2_real, dump1, dump2 = validation(model, test_set, criterion=criterion, obs=True)
-        print("test loss:", val_loss_real, "test r2:", val_r2_real)
         dump3, dump4, dump5, dump4 = validation(
         model, show_set, criterion, num_data=3, origin=False, obs=True, show=True, fig_num=1)
     else:
-        val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(
-            model, test_set, criterion, num_data=4, origin=False, obs=True, show=True, fig_num=1)
-        print('validation loss with obs = ', val_loss_obs,
-            '\nR2 loss with obs = ', val_r2_obs)
-        print('validation loss wo obs = ', val_loss_wo,
-            '\nR2 loss wo obs = ', val_r2_wo)
+        dump3, dump4, dump5, dump4 = validation(
+        model, show_set, criterion, num_data=4, origin=False, obs=True, show=True, fig_num=1)    
+        
     print(config)
-    if os.path.exists(fig_path + name + '_val.png'):
-        print('found old image, removing')
-        os.remove(fig_path + name + '_val.png')
+    # if os.path.exists(fig_path + name + '_val.png'):
+    #     print('found old image, removing')
+    #     os.remove(fig_path + name + '_val.png')
     plt.savefig(fig_path + name + '_val', dpi=300, bbox_inches='tight')
-    plt.close()
-    # plt.show()
 
     return 0
 
+def recurrent_run():
+    EPOCH = 20
+    BATCH_SIZE = 1
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    assert len(sys.argv) == 2
+    with open('./config.json') as f:
+        config = json.load(f)
+
+    order = config['order']
+    layer = config['layer']
+    structure = config['structure']
+    note = config['note']
+    data = config['data']
+    fig_path = config['fig_path']
+    name = data + '_' + str(order) + '_' + str(layer) + '_' + structure + '_' + note
+    print(name)
+    criterion = RMSELoss()
+
+    data_gen = MyData()
+    if data == "femto":
+        train_set, test_set, show_set = data_gen.get_femto_data()
+    else:
+        train_set, test_set, show_set = data_gen.get_case_data(data)
+
+    train_set, val_set = torch.utils.data.random_split(train_set, [600-150, 150])
+    train_ls = []
+    train_r2 = []
+    val_ls = []
+    val_r2 = []
+    test_ls = []
+    test_r2 = []
+    
+    for i in range(3):
+        print("Training number ", i+1)
+        if structure == 'serial':
+            model = StateModel(order, in_dim=2, out_dim=1, layers=layer,
+                        observer=True, activation='None', device=device)
+        elif structure == 'parallel':
+            model = ParallelModel(order, in_dim=2, out_dim=1, layers=layer,
+                                seq_len=112, activation="None", device=device)
+        else:
+            print('Unrecognized model structure:', structure)
+            sys.exit(-2)
+        train_history = train(model,
+                            criterion,
+                            r2_loss,
+                            epoch=EPOCH,
+                            train_set=train_set,
+                            val_set=val_set,
+                            batch_size=BATCH_SIZE,
+                            optimizer='Adam',
+                            learning_rate=0.0005,
+                            grad_clip=30, 
+                            print_loss=True)
+        val_loss_obs, val_r2_obs, val_loss_wo, val_r2_wo = validation(
+                model, test_set, criterion, origin=False, obs=True)
+        # print('validation loss with obs = ', val_loss_obs,
+        #         '\nR2 loss with obs = ', val_r2_obs)
+        # print('validation loss wo obs = ', val_loss_wo,
+        #         '\nR2 loss wo obs = ', val_r2_wo)
+        train_ls.append(format(train_history.train_loss[-1], '.4f'))
+        train_r2.append(format(train_history.train_r2[-1], '.4f'))
+        val_ls.append(format(train_history.val_loss[-1], '.4f'))
+        val_r2.append(format(train_history.val_r2[-1], '.4f'))
+        test_ls.append(format(val_loss_obs, '.4f'))
+        test_r2.append(format(val_r2_obs, '.4f'))
+    print('Train loss all: ', train_ls, '\nTrain R2 all: ', train_r2, 
+        '\nVal loss all: ', val_ls, '\nVal R2 all: ', val_r2,
+        '\nTest loss all: ', test_ls, '\nTest R2 all: ', test_r2)
+    print(name)
+    f = open('../results/'+name+'.txt', 'w')
+    f.writelines(name)
+    f.writelines('\n'+str(train_ls))
+    f.writelines('\n'+str(train_r2))
+    f.writelines('\n'+str(val_ls))
+    f.writelines('\n'+str(val_r2))
+    f.writelines('\n'+str(test_ls))
+    f.writelines('\n'+str(test_r2))
 
 if __name__ == '__main__':
-    main()
+    # main()
+    recurrent_run()

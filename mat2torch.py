@@ -118,38 +118,49 @@ def split_data(u, y, length):
     return u_target, y_target
 
 def split_train_test(u1_all, u2_all, u3_all, u4_all, c1_all, c2_all, c3_all, c4_all):
-    u1_train = u1_all[:-1]
-    u2_train = u2_all[:-1]
-    u3_train = u3_all[:-1]
-    u4_train = u4_all[:-1]
-    u1_test = [u1_all[-1]]
-    u2_test = [u2_all[-1]]
-    u3_test = [u3_all[-1]]
-    u4_test = [u4_all[-1]]
-    c1_train = c1_all[:-1]
-    c2_train = c2_all[:-1]
-    c3_train = c3_all[:-1]
-    c4_train = c4_all[:-1]
-    c1_test = [c1_all[-1]]
-    c2_test = [c2_all[-1]]
-    c3_test = [c3_all[-1]]
-    c4_test = [c4_all[-1]]
+    u1_train = u1_all[0:150]
+    u2_train = u2_all[0:150]
+    u3_train = u3_all[0:150]
+    u4_train = u4_all[0:150]
+    u1_test = u1_all[150:]
+    u2_test = u2_all[150:]
+    u3_test = u3_all[150:]
+    u4_test = u4_all[150:]
+    c1_train = c1_all[0:150]
+    c2_train = c2_all[0:150]
+    c3_train = c3_all[0:150]
+    c4_train = c4_all[0:150]
+    c1_test = c1_all[150:]
+    c2_test = c2_all[150:]
+    c3_test = c3_all[150:]
+    c4_test = c4_all[150:]
+    c1_show = [c1_test[0]]
+    c2_show = [c2_test[0]]
+    c3_show = [c3_test[0]]
+    c4_show = [c4_test[0]]
+    u1_show = [u1_test[0]]
+    u2_show = [u2_test[0]]
+    u3_show = [u3_test[0]]
+    u4_show = [u4_test[0]]
+    c_show = c1_show + c2_show + c3_show + c4_show
+    u_show = u1_show + u2_show + u3_show + u4_show
+    print(len(c_show), len(u_show))
 
     u_train = u1_train + u2_train + u3_train + u4_train
     c_train = c1_train + c2_train + c3_train + c4_train 
     u_test = u1_test + u2_test + u3_test + u4_test
     c_test = c1_test + c2_test + c3_test + c4_test
 
-    return u_train, c_train, u_test, c_test
+    return u_train, c_train, u_test, c_test, u_show, c_show
 
 
-def case_data(path:str):
+def case_data(path:str, name:str):
     case_all = scio.loadmat(path)
     u1 = case_all.get('u1')
     u2 = case_all.get('u2')
     u3 = case_all.get('u3')
     u4 = case_all.get('u4')
-    print(u1.shape, u2.shape, u3.shape, u4.shape)
+    # print(u1.shape, u2.shape, u3.shape, u4.shape)
 
     c1 = case_all.get('c1')
     c2 = case_all.get('c2')
@@ -160,15 +171,15 @@ def case_data(path:str):
     len2 = c2.shape[0]
     len3 = c3.shape[0]
     len4 = c4.shape[0]
+    # print(len1)
     
     u1_all, c1_all = split_data(u1, c1, len1)
     u2_all, c2_all = split_data(u2, c2, len2)
     u3_all, c3_all = split_data(u3, c3, len3)
     u4_all, c4_all = split_data(u4, c4, len4)
 
-    print(len(u1_all), len(c1_all))
-
-    u_train, c_train, u_test, c_test = split_train_test(u1_all, u2_all, u3_all, u4_all, c1_all, c2_all, c3_all, c4_all)
+    u_train, c_train, u_test, c_test, u_show, c_show = split_train_test(u1_all, u2_all, u3_all, u4_all, c1_all, c2_all, c3_all, c4_all)
+    # print(len(u_train), len(u_test))
 
     u_train = torch.FloatTensor(u_train)
     c_train = torch.FloatTensor(c_train)
@@ -176,12 +187,18 @@ def case_data(path:str):
     u_test = torch.FloatTensor(u_test)
     c_test = torch.FloatTensor(c_test)
 
+    u_show = torch.FloatTensor(u_show)
+    c_show = torch.FloatTensor(c_show)
+
+    print(name)
     print(u_train.shape, u_test.shape)
 
-    torch.save(u_train, '../data/case_data/train/train_u_fd21_ball.pt')
-    torch.save(c_train, '../data/case_data/train/train_y_fd21_ball.pt')
-    torch.save(u_test, '../data/case_data/test/test_u_fd21_ball.pt')
-    torch.save(c_test, '../data/case_data/test/test_y_fd21_ball.pt')
+    torch.save(u_train, '../data/case_data/train/train_u_' + name + '.pt')
+    torch.save(c_train, '../data/case_data/train/train_y_' + name + '.pt')
+    torch.save(u_test, '../data/case_data/test/test_u_' + name + '.pt')
+    torch.save(c_test, '../data/case_data/test/test_y_' + name + '.pt')
+    torch.save(u_show, '../data/case_data/test/show_u_' + name + '.pt')
+    torch.save(c_show, '../data/case_data/test/show_y_' + name + '.pt')
 
     pass
 
@@ -218,17 +235,21 @@ def plot_sth():
     plt.show()
 
 
-
-if __name__ == '__main__':
-    path = '../data/femto_data/train/'
-    data = scio.loadmat(path+'femto_train_long.mat')
+def femto_main():
+    data = scio.loadmat('../data/final_femto.mat')
     u1 = data.get('u1')
     u2 = data.get('u2')
     u3 = data.get('u3')
+    u1_test = data.get('u1_test')
+    u2_test = data.get('u2_test')
+    u3_test = data.get('u3_test')
 
     d1 = data.get('d1')
     d2 = data.get('d2')
     d3 = data.get('d3')
+    d1_test = data.get('d1_test')
+    d2_test = data.get('d2_test')
+    d3_test = data.get('d3_test')
 
     print(u1.shape, d1.shape)
     len1 = d1.shape[0]
@@ -236,26 +257,36 @@ if __name__ == '__main__':
     len3 = d3.shape[0]
 
     u1_all, d1_all = split_data(u1, d1, len1)
-    # u1_show = [u1_all[1]]
-    # d1_show = [d1_all[1]]
+    u1_test_all, d1_test_all = split_data(u1_test, d1_test, 50)
+    u1_show = [u1_test_all[1]]
+    d1_show = [d1_test_all[1]]
     u2_all, d2_all = split_data(u2, d2, len2)
-    # u2_show = [u2_all[1]]
-    # d2_show = [d2_all[1]]
+    u2_test_all, d2_test_all = split_data(u2_test, d2_test, 50)
+    u2_show = [u2_test_all[1]]
+    d2_show = [d2_test_all[1]]
     u3_all, d3_all = split_data(u3, d3, len3)
-    # u3_show = [u3_all[1]]
-    # d3_show = [d3_all[1]]
-    # u_show = u1_show + u2_show + u3_show
-    # y_show = d1_show + d2_show + d3_show
-    # print(len(u_show), len(y_show))
-    # print(u_show[1].shape, y_show[1].shape)
+    u3_test_all, d3_test_all = split_data(u3_test, d3_test, 50)
+    u3_show = [u3_test_all[1]]
+    d3_show = [d3_test_all[1]]
+    u_show = u1_show + u2_show + u3_show
+    y_show = d1_show + d2_show + d3_show
+    print(len(u_show), len(y_show))
+    print(u_show[1].shape, y_show[1].shape)
 
     u_train = u1_all + u2_all + u3_all
     y_train = d1_all + d2_all + d3_all
+    u_test = u1_test_all + u2_test_all + u3_test_all
+    y_test = d1_test_all + d2_test_all + d3_test_all
 
     torch.save(torch.FloatTensor(u_train), '../data/femto_data/train/train_u_all.pt')
     torch.save(torch.FloatTensor(y_train), '../data/femto_data/train/train_y_all.pt')
-    # torch.save(torch.FloatTensor(u_show), '../data/femto_data/test/show_u_all.pt')
-    # torch.save(torch.FloatTensor(y_show), '../data/femto_data/test/show_y_all.pt')
-    # path = '../data/case_fd21_ball.mat'
-    # case_data(path)
+    torch.save(torch.FloatTensor(u_test), '../data/femto_data/test/test_u_all.pt')
+    torch.save(torch.FloatTensor(y_test), '../data/femto_data/test/test_y_all.pt')
+    torch.save(torch.FloatTensor(u_show), '../data/femto_data/test/show_u_all.pt')
+    torch.save(torch.FloatTensor(y_show), '../data/femto_data/test/show_y_all.pt')
+
+
+if __name__ == '__main__':
+    # femto_main()
+    case_data('../data/final_ball21.mat', 'ball21')
     

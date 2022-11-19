@@ -145,33 +145,28 @@ class MyData:
 
     @staticmethod
     def get_case_data(name: str):
-        len_dict = {'outer07': 25,
-                    'outer21': 41,
-                    'inner07': 52,
-                    'inner14': 39,
-                    'inner21': 63,
-                    'inner28': 56,
-                    'ball07': 40,
-                    'ball14': 42,
-                    'ball21': 48
-                    }
-        length = len_dict.get(name)
         train_u_name = '../data/case_data/train/train_u_' + name + '.pt'
         train_y_name = '../data/case_data/train/train_y_' + name + '.pt'
         test_u_name = '../data/case_data/test/test_u_' + name + '.pt'
         test_y_name = '../data/case_data/test/test_y_' + name + '.pt'
+        show_u_name = '../data/case_data/test/show_u_' + name + '.pt'
+        show_y_name = '../data/case_data/test/show_y_' + name + '.pt'
         train_u = torch.load(train_u_name)
         train_y = torch.load(train_y_name)
         test_u = torch.load(test_u_name)
         test_y = torch.load(test_y_name)
+        show_u = torch.load(show_u_name)
+        show_y = torch.load(show_y_name)
         train_set = Data.TensorDataset(train_u.cuda(),
                                        train_y.cuda(),
                                        train_y.cuda())
         test_set = Data.TensorDataset(test_u.cuda(),
                                       test_y.cuda(),
                                       test_y.cuda())
-
-        return train_set, test_set, length
+        show_set = Data.TensorDataset(show_u.cuda(),
+                                      show_y.cuda(),
+                                      show_y.cuda())
+        return train_set, test_set, show_set
 
     @staticmethod
     def get_femto_data():
@@ -196,5 +191,4 @@ class MyData:
         show_set = Data.TensorDataset(show_u.cuda(), 
                                       show_y.cuda(), 
                                       show_y.cuda())
-        length = 89 + 75 + 85
-        return train_set, test_set, length, show_set
+        return train_set, test_set, show_set

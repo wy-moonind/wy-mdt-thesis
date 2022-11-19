@@ -47,7 +47,7 @@ class StateNeuron(nn.Module):
 
     def reset_parameter(self):
         for weight in self.parameters():
-            nn.init.uniform_(weight, -0.5, 0.5)
+            nn.init.uniform_(weight, -0.7, 0.7)
 
     def nonlinear(self, error):
         # fal function

@@ -19,7 +19,7 @@ def validation(model: nn.Module,
         dataset=val_set, batch_size=1, shuffle=False)
     if show:
         fig = plt.figure(fig_num)
-        fig.set_size_inches(12, 7, forward=True)
+        fig.set_size_inches(22/2.54, 16/2.54, forward=True)
         # fig.suptitle('Randomly selected validation data')
     if origin:
         val_loss_wo = []
@@ -44,15 +44,16 @@ def validation(model: nn.Module,
             assert idx <= num_data
             plt.subplot(num_data, 1, idx + 1)
             plt.plot(batch_y.detach().cpu().numpy().T)
-            lgd_vec = ["target"]
+            lgd_vec = ["Target"]
             if obs:
                 plt.plot(pred_obs.detach().numpy().T)
-                lgd_vec.append("prediction with obs")
+                lgd_vec.append("Prediction")
             if origin:
                 plt.plot(pred.detach().numpy().T)
-                lgd_vec.append("prediction")
+                lgd_vec.append("Prediction")
             plt.legend(lgd_vec, loc="upper right")
-            plt.ylabel('Acceleration')
+            plt.ylabel('Acceleration', fontsize=8)
+            plt.xlabel('Timesteps', fontsize=10)
             plt.grid(True)
     avg_val_loss_wo = None
     avg_val_r2_wo = None
