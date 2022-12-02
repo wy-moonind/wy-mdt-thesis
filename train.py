@@ -36,7 +36,7 @@ def train(model: nn.Module,
         sys.exit(-1)
     last_loss = 1e20
     last_r2 = -1e20
-    patience = 2
+    patience = 1
     trigger_times = 0
     restart = True
     while restart:
@@ -50,7 +50,10 @@ def train(model: nn.Module,
                 y_init = torch.autograd.Variable(batch_yobs)
                 y = torch.autograd.Variable(batch_y)
                 if model.observer:
-                    output = model(x, y_obs=y_init)
+                    if model.return_feat:
+                        output, feat_list = model(x, y_obs=y_init)
+                    else:
+                        output = model(x, y_obs=y_init)
                 else:
                     output = model(x)
                 loss = criterion(output, y)
@@ -91,13 +94,14 @@ def train(model: nn.Module,
                     print('Validation loss = ', val_loss, '; val r2 = ', val_r2)
 
             # Early-stopping
-            if train_r2 < last_r2:
-                trigger_times += 1
-                if trigger_times >= patience:
-                    print('Early stopping!\nEpoch:', eph)
-                    return history
-            else:
-                trigger_times = 0
-            last_r2 = train_r2
+            if eph >=2:
+                if train_r2 < last_r2:
+                    trigger_times += 1
+                    if trigger_times >= patience:
+                        print('Early stopping!\nEpoch:', eph + 1)
+                        return history
+                else:
+                    trigger_times = 0
+                last_r2 = train_r2
 
     return history

@@ -17,7 +17,12 @@ import datetime
 
 class ParallelModel(nn.Module):
 
-    def __init__(self, order, in_dim=1, out_dim=1,layers=2, seq_len=112, activation='Tanh', device=torch.device('cpu')):
+    def __init__(self, order, layers=2, 
+                in_dim=1, out_dim=1, 
+                seq_len=112, 
+                activation='Tanh', 
+                device=torch.device('cpu'), 
+                return_feat=False):
         super(ParallelModel, self).__init__()
         self.order = order
         self.in_dim = in_dim
@@ -26,6 +31,7 @@ class ParallelModel(nn.Module):
         self.layers = layers
         self.observer = True
         self.activation = activation
+        self.return_feat = return_feat
         self.acti = nn.Tanh()
         assert self.layers >= 2
         self.state_layer1 = StateNeuron(self.order,
@@ -33,42 +39,40 @@ class ParallelModel(nn.Module):
                                         out_dim=self.out_dim,
                                         observer=True,
                                         activation=self.activation,
-                                        device=device)
+                                        device=device, 
+                                        return_feat=return_feat)
         if self.layers >= 2:                                    
             self.state_layer2 = StateNeuron(self.order,
                                             in_dim=self.in_dim,
                                             out_dim=self.out_dim,
                                             observer=True,
                                             activation=self.activation,
-                                            device=device)
+                                            device=device, 
+                                            return_feat=return_feat)
         if self.layers >= 3:                                    
             self.state_layer3 = StateNeuron(self.order,
                                             in_dim=self.in_dim,
                                             out_dim=self.out_dim,
                                             observer=True,
                                             activation=self.activation,
-                                            device=device)
+                                            device=device, 
+                                            return_feat=return_feat)
         if self.layers >= 4:                                    
             self.state_layer4 = StateNeuron(self.order,
                                             in_dim=self.in_dim,
                                             out_dim=self.out_dim,
                                             observer=True,
                                             activation=self.activation,
-                                            device=device)
+                                            device=device, 
+                                            return_feat=return_feat)
         if self.layers >= 5:                                    
             self.state_layer5 = StateNeuron(self.order,
                                             in_dim=self.in_dim,
                                             out_dim=self.out_dim,
                                             observer=True,
                                             activation=self.activation,
-                                            device=device)
-        if self.layers >= 6:                                    
-            self.state_layer5 = StateNeuron(self.order,
-                                            in_dim=self.in_dim,
-                                            out_dim=self.out_dim,
-                                            observer=True,
-                                            activation=self.activation,
-                                            device=device)
+                                            device=device, 
+                                            return_feat=return_feat)
         self.fully_connected = nn.Linear(
             in_features=self.seq_len*self.layers, out_features=self.seq_len, bias=False).to(device)
         for weight in self.fully_connected.parameters():
@@ -86,32 +90,39 @@ class ParallelModel(nn.Module):
 
     def forward(self, x, y_obs=None):
         assert y_obs.shape[1] == self.seq_len
-        out1 = self.state_layer1(x, y_obs=y_obs)
+        feat_list = []
+        out1, feat1 = self.state_layer1(x, y_obs=y_obs)
         all = [out1]
+        feat_list.append(feat1.detach())
         if self.layers >= 2: 
-            out2 = self.state_layer2(x, y_obs=y_obs)
+            out2, feat2 = self.state_layer2(x, y_obs=y_obs)
             all.append(out2)
+            feat_list.append(feat2.detach())
         if self.layers >= 3: 
-            out3 = self.state_layer2(x, y_obs=y_obs)
+            out3, feat3 = self.state_layer2(x, y_obs=y_obs)
             all.append(out3)
+            feat_list.append(feat3.detach())
         if self.layers >= 4: 
-            out4 = self.state_layer2(x, y_obs=y_obs)
+            out4, feat4 = self.state_layer2(x, y_obs=y_obs)
             all.append(out4)
+            feat_list.append(feat4.detach())
         if self.layers >= 5: 
-            out5 = self.state_layer2(x, y_obs=y_obs)
+            out5, feat5 = self.state_layer2(x, y_obs=y_obs)
             all.append(out5)
-        if self.layers >= 6: 
-            out6 = self.state_layer2(x, y_obs=y_obs)
-            all.append(out6)
+            feat_list.append(feat5.detach())
         combined = torch.cat(all, 1)
         out = self.fully_connected(combined)
 
-        return self.acti(out)
+        return self.acti(out), feat_list
 
 
 class StateModel(nn.Module):
 
-    def __init__(self, order, in_dim=1, out_dim=1, layers=1, observer=False, activation='Tanh', device=torch.device('cpu')):
+    def __init__(self, order, in_dim=1, out_dim=1,
+                 layers=1, observer=False,
+                 activation='Tanh',
+                 device=torch.device('cpu'),
+                 return_feat=False):
         super(StateModel, self).__init__()
         self.order = order
         self.in_dim = in_dim
@@ -119,6 +130,7 @@ class StateModel(nn.Module):
         self.layers = layers
         self.observer = observer
         self.activation = activation
+        self.return_feat = return_feat
         if layers>=2:
             self.state_space1 = StateSpace(2, in_dim=self.in_dim, activation='None', device=device)
         if layers>=3:
@@ -137,7 +149,7 @@ class StateModel(nn.Module):
                                         out_dim=self.out_dim,
                                         observer=True,
                                         activation=self.activation,
-                                        device=device)
+                                        device=device, return_feat=return_feat)
     def reset_parameter(self):
         for weight in self.parameters():
             nn.init.uniform_(weight, -0.5, 0.5)
@@ -212,7 +224,7 @@ def main():
     else:
         train_set, test_set, show_set = data_gen.get_case_data(data)
 
-    train_set, val_set = torch.utils.data.random_split(train_set, [600-150, 150])
+    train_set, val_set = torch.utils.data.random_split(train_set, [450-100, 100])
 
     # training
     start = datetime.datetime.now()
@@ -221,7 +233,7 @@ def main():
                           r2_loss,
                           epoch=EPOCH,
                           train_set=train_set,
-                        #   val_set=val_set,
+                          val_set=val_set,
                           batch_size=BATCH_SIZE,
                           optimizer='Adam',
                           learning_rate=0.0005,
@@ -229,14 +241,14 @@ def main():
     end = datetime.datetime.now()
     print('Time for training: ', (end - start).seconds, 'seconds')
 
-    # model_name = '../models/' + name + '.pt'
-    # torch.save(model, model_name)
-    # his_name = '../history/' + name + '.pt'
-    # his = torch.tensor([train_history.train_loss, 
-    #                                 train_history.train_r2, 
-    #                                 train_history.val_loss, 
-    #                                 train_history.val_r2])
-    # torch.save(his, his_name)
+    model_name = '../models/' + name + '.pt'
+    torch.save(model, model_name)
+    his_name = '../history/' + name + '.pt'
+    his = torch.tensor([train_history.train_loss, 
+                                    train_history.train_r2, 
+                                    train_history.val_loss, 
+                                    train_history.val_r2])
+    torch.save(his, his_name)
     print('Name of the model: ', name)
     is_good = input("Continue validation? 1 to continue, 2 abort: ")
     is_good = int(is_good)
@@ -250,12 +262,12 @@ def main():
     plt.plot(epoch_vec, train_history.train_loss)
     plt.plot(epoch_vec, train_history.train_r2)
     lgd = ['Training loss', 'Training R2-value']
-    if note == "final":
+    if note == "newdata":
         plt.plot(epoch_vec, train_history.val_loss)
         plt.plot(epoch_vec, train_history.val_r2)
         lgd.append("Validation loss")
         lgd.append("Validation R2-value")
-    plt.legend(lgd, loc="upper right")
+    plt.legend(lgd, loc="upper right", fontsize=15)
     plt.ylim(0, 1.5)
     plt.xlabel('Epoch', fontsize=15)
     plt.xticks(size=15)
@@ -287,6 +299,7 @@ def main():
     #     print('found old image, removing')
     #     os.remove(fig_path + name + '_val.png')
     plt.savefig(fig_path + name + '_val', dpi=300, bbox_inches='tight')
+    plt.show()
 
     return 0
 
@@ -371,5 +384,5 @@ def recurrent_run():
     f.writelines('\n'+str(test_r2))
 
 if __name__ == '__main__':
-    # main()
-    recurrent_run()
+    main()
+    # recurrent_run()

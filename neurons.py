@@ -16,13 +16,17 @@ activ_dict = {'ReLU': nn.ReLU(),
 
 
 class StateNeuron(nn.Module):
-    def __init__(self, order, in_dim=1, out_dim=1, observer=False, activation='Tanh', device=torch.device('cpu')):
+    def __init__(self, order, in_dim=1, out_dim=1,
+                 observer=False, activation='Tanh',
+                 device=torch.device('cpu'),
+                 return_feat=False):
         super(StateNeuron, self).__init__()
         self.seq_len = 0
         self.order = order
         self.inp_dim = in_dim
         self.out_dim = out_dim
         self.observer = observer
+        self.return_feat = return_feat
         self.weight_a = nn.Parameter(torch.ones(
             (self.order, self.order), device=device))
         self.weight_b = nn.Parameter(torch.ones(
@@ -93,9 +97,13 @@ class StateNeuron(nn.Module):
                 x_t1 += self.weight_l * self.nonlinear(y_obs[0, i] - y_t)
             if i == 0:
                 y_hat = y_t
+                x_hat = hidden
             else:
                 y_hat = torch.cat((y_hat, y_t), 1)
+                x_hat = torch.cat((x_hat, hidden), 1)
             hidden = x_t1
+        if self.return_feat:
+            return self.activation(y_hat), x_hat
         return self.activation(y_hat)
 
 
