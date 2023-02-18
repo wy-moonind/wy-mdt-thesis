@@ -28,7 +28,8 @@ def validation(model: nn.Module,
     val_r2_obs = []
     for idx, (batch_x, batch_obs, batch_y) in enumerate(val_loader):
         if obs:
-            pred_obs = model(batch_x, y_obs=batch_obs).cpu()
+            pred_obs = model(batch_x, y_obs=batch_obs)
+            pred_obs = pred_obs.cpu()
             temp_val_r2 = r2_loss(pred_obs.cuda(), batch_y)
             temp_loss_obs = criterion(pred_obs.cuda(), batch_y).item()
             val_loss_obs.append(temp_loss_obs)

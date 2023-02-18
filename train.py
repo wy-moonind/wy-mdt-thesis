@@ -50,10 +50,7 @@ def train(model: nn.Module,
                 y_init = torch.autograd.Variable(batch_yobs)
                 y = torch.autograd.Variable(batch_y)
                 if model.observer:
-                    if model.return_feat:
-                        output, feat_list = model(x, y_obs=y_init)
-                    else:
-                        output = model(x, y_obs=y_init)
+                    output = model(x, y_obs=y_init)
                 else:
                     output = model(x)
                 loss = criterion(output, y)

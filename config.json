@@ -1,8 +1,8 @@
 {
-    "order": 15,
-    "layer": 5,
+    "order": 3,
+    "layer": 2,
     "structure":"serial",
-    "note":"newdata",
-    "data": "femto",
-    "fig_path": "../figs/femto/"
+    "note":"pltv",
+    "data": "outer07",
+    "fig_path": "../figs/outer07/"
 }

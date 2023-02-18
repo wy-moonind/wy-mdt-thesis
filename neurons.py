@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from torch import nn
+import copy
 
 
 def non_act(x):
@@ -61,7 +62,7 @@ class StateNeuron(nn.Module):
         else:
             return torch.pow(input=torch.abs(error), exponent=self.weight_alpha) * torch.sign(error)
 
-    def forward(self, u, y_obs=None):
+    def forward(self, u, y_obs=None, feat_list=None):
         if u.ndim > 2:
             u = torch.squeeze(u)
         self.seq_len = u.shape[1]
@@ -93,7 +94,7 @@ class StateNeuron(nn.Module):
                 x_t1 = torch.mm(self.weight_a, hidden) + \
                     self.weight_b * u[:, i]
             if y_obs is not None:
-                # x_t1 += self.weight_l * (y_obs[0, i] - y_t)
+                # x_t1 += self.weight_l * (y_obs[0, i] - y_t) # linear observer
                 x_t1 += self.weight_l * self.nonlinear(y_obs[0, i] - y_t)
             if i == 0:
                 y_hat = y_t
@@ -103,7 +104,8 @@ class StateNeuron(nn.Module):
                 x_hat = torch.cat((x_hat, hidden), 1)
             hidden = x_t1
         if self.return_feat:
-            return self.activation(y_hat), x_hat
+            assert type(feat_list) == list
+            feat_list.append(copy.deepcopy(x_hat.detach()))
         return self.activation(y_hat)
 
 

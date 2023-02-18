@@ -13,13 +13,14 @@ import sys
 import os
 import json
 import datetime
+import copy
 
 
 class ParallelModel(nn.Module):
 
     def __init__(self, order, layers=2, 
                 in_dim=1, out_dim=1, 
-                seq_len=112, 
+                seq_len=116, 
                 activation='Tanh', 
                 device=torch.device('cpu'), 
                 return_feat=False):
@@ -88,32 +89,28 @@ class ParallelModel(nn.Module):
                             for p in self.parameters() if p.requires_grad)
         return {'Total': total_num, 'Trainable': trainable_num}
 
-    def forward(self, x, y_obs=None):
+    def forward(self, x, y_obs=None, feat_list=None):
         assert y_obs.shape[1] == self.seq_len
-        feat_list = []
-        out1, feat1 = self.state_layer1(x, y_obs=y_obs)
+        if self.return_feat:
+            assert type(feat_list) == list
+        out1 = self.state_layer1(x, y_obs=y_obs, feat_list=feat_list)
         all = [out1]
-        feat_list.append(feat1.detach())
         if self.layers >= 2: 
-            out2, feat2 = self.state_layer2(x, y_obs=y_obs)
+            out2 = self.state_layer2(x, y_obs=y_obs, feat_list=feat_list)
             all.append(out2)
-            feat_list.append(feat2.detach())
         if self.layers >= 3: 
-            out3, feat3 = self.state_layer2(x, y_obs=y_obs)
+            out3 = self.state_layer2(x, y_obs=y_obs, feat_list=feat_list)
             all.append(out3)
-            feat_list.append(feat3.detach())
         if self.layers >= 4: 
-            out4, feat4 = self.state_layer2(x, y_obs=y_obs)
+            out4 = self.state_layer2(x, y_obs=y_obs, feat_list=feat_list)
             all.append(out4)
-            feat_list.append(feat4.detach())
         if self.layers >= 5: 
-            out5, feat5 = self.state_layer2(x, y_obs=y_obs)
+            out5 = self.state_layer2(x, y_obs=y_obs, feat_list=feat_list)
             all.append(out5)
-            feat_list.append(feat5.detach())
         combined = torch.cat(all, 1)
         out = self.fully_connected(combined)
 
-        return self.acti(out), feat_list
+        return self.acti(out)
 
 
 class StateModel(nn.Module):
@@ -160,22 +157,36 @@ class StateModel(nn.Module):
                             for p in self.parameters() if p.requires_grad)
         return {'Total': total_num, 'Trainable': trainable_num}
 
-    def forward(self, x, y_obs=None):
+    def forward(self, x, y_obs=None, feat_list=None):
         if y_obs is not None:
             assert self.observer
+        if self.return_feat:
+            assert type(feat_list) == list
         if self.layers >=2:
             out = self.state_space1(x)
+            if self.return_feat:
+                feat_list.append(copy.deepcopy(out.detach()))
         if self.layers >=3:
             out = self.state_space2(out)
+            if self.return_feat:
+                feat_list.append(copy.deepcopy(out.detach()))
         if self.layers >=4:
             out = self.state_space3(out)
+            if self.return_feat:
+                feat_list.append(copy.deepcopy(out.detach()))
         if self.layers >=5:
             out = self.state_space4(out)
+            if self.return_feat:
+                feat_list.append(copy.deepcopy(out.detach()))
         if self.layers >=6:
             out = self.state_space5(out)
+            if self.return_feat:
+                feat_list.append(copy.deepcopy(out.detach()))
         if self.layers>=7:
             out = self.state_space6(out)
-        out = self.state_layer1(out if self.layers>1 else x, y_obs=y_obs)
+            if self.return_feat:
+                feat_list.append(copy.deepcopy(out.detach()))
+        out = self.state_layer1(out if self.layers>1 else x, y_obs=y_obs, feat_list=feat_list)
         return out
 
 
@@ -207,7 +218,7 @@ def main():
                            observer=True, activation='None', device=device)
     elif structure == 'parallel':
         model = ParallelModel(order, in_dim=2, out_dim=1, layers=layer,
-                              seq_len=112, activation="None", device=device)
+                              seq_len=116, activation="None", device=device, return_feat=False)
     else:
         print('Unrecognized model structure:', structure)
         sys.exit(-2)
@@ -224,7 +235,7 @@ def main():
     else:
         train_set, test_set, show_set = data_gen.get_case_data(data)
 
-    train_set, val_set = torch.utils.data.random_split(train_set, [450-100, 100])
+    train_set, val_set = torch.utils.data.random_split(train_set, [600-150, 150])
 
     # training
     start = datetime.datetime.now()
@@ -262,7 +273,7 @@ def main():
     plt.plot(epoch_vec, train_history.train_loss)
     plt.plot(epoch_vec, train_history.train_r2)
     lgd = ['Training loss', 'Training R2-value']
-    if note == "newdata":
+    if note == "pltv":
         plt.plot(epoch_vec, train_history.val_loss)
         plt.plot(epoch_vec, train_history.val_r2)
         lgd.append("Validation loss")

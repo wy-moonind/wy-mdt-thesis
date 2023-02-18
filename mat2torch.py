@@ -203,38 +203,6 @@ def case_data(path:str, name:str):
     pass
 
 
-def plot_sth():
-    case_all = scio.loadmat('./bearing_data/case_fd21_outer.mat')
-    y246 = case_all.get('x246')
-    y = y246[0, :]
-    t = np.linspace(0, 1, num=y.shape[0]) / 12000
-
-    plt.figure(0)
-    plt.plot(t, y)
-    plt.xlabel('Time [s]')
-    plt.ylabel('Acceleration')
-    plt.grid(True)
-    plt.ticklabel_format(style='plain')
-
-    plt.figure(1)
-    envelope = scio.loadmat('../bearing_data/case/envelope.mat')
-    es = envelope.get('es')
-    f = envelope.get('f')
-    plt.plot(f, es)
-    plt.vlines(107.5, 0, 0.07, colors='y', linestyles='dashed')
-    plt.vlines(107.5 * 2, 0, 0.07, colors='y', linestyles='dashed')
-    plt.vlines(107.5 * 3, 0, 0.07, colors='y', linestyles='dashed')
-    plt.vlines(107.5 * 4, 0, 0.07, colors='y', linestyles='dashed')
-    plt.xlabel('Frequency [Hz]')
-    plt.ylabel('Amplitude')
-    plt.title('Envelope spectrum of outer race data')
-    plt.xlim(0, 500)
-    plt.ylim(0, 0.07)
-    plt.grid(True)
-
-    plt.show()
-
-
 def femto_main():
     data = scio.loadmat('../data/final_femto.mat')
     u1 = data.get('u1')
@@ -285,8 +253,30 @@ def femto_main():
     torch.save(torch.FloatTensor(u_show), '../data/femto_data/test/show_u_all.pt')
     torch.save(torch.FloatTensor(y_show), '../data/femto_data/test/show_y_all.pt')
 
+def femto_show():
+    data = scio.loadmat('../data/femto_show.mat')
+    u = data.get('femto_show_u')
+    y = data.get('femto_show_y')
+    # print(y)
+    u1 = u[0:2, :]
+    # print(u1)
+    u1 = u1.reshape(2,286)
+    u_all = [u1]+[u1]+[u1]
+    y_all = [list(y[0,:]),list(y[1,:]),list(y[2,:])]
+
+    torch_u = torch.FloatTensor(u_all)
+    torch_y = torch.FloatTensor(y_all)
+
+    torch.save(torch_u, '../data/femto_show_u.pt')
+    torch.save(torch_y, '../data/femto_show_y.pt')
+
+    print(torch_u.shape, torch_y.shape)
+
+
+
 
 if __name__ == '__main__':
-    # femto_main()
-    case_data('../data/final_ball21.mat', 'ball21')
+    femto_show()
+    # case_data('../data/final_ball21.mat', 'ball21')
+    # plot_sth()
     
