@@ -21,6 +21,12 @@ class AvgLoss(nn.Module):
 
 
 def r2_loss(output, target):
+    """
+    R2 score loss
+    :param output: prediction
+    :param target: actual signal
+    :return: torch.tensor, R2 score with maximum value of 1
+    """
     target_mean = torch.mean(target)
     ss_tot = torch.sum((target - target_mean) ** 2)
     ss_res = torch.sum((target - output) ** 2)
@@ -29,11 +35,20 @@ def r2_loss(output, target):
 
 
 class RMSELoss(nn.Module):
+    """
+    Definition of RMSE
+    """
     def __init__(self):
         super(RMSELoss, self).__init__()
         self.mse = nn.MSELoss()
 
     def forward(self, x, y):
+        """
+        Calculating the RMSE
+        :param x: prediction
+        :param y: actual signal
+        :return: torch.tensor, RMSE loss between x and y
+        """
         return torch.sqrt(self.mse(x, y))
 
 

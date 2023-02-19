@@ -1,9 +1,6 @@
-import numpy as np
+
 import torch
-from torch import nn
 import torch.utils.data as Data
-import scipy.io as scio
-from utils import import_data
 
 
 class MyData:
@@ -13,6 +10,12 @@ class MyData:
 
     @staticmethod
     def get_case_data(name: str):
+        """
+        Get the CWRU dataset
+
+        :param name: string, name of the sub dataset
+        :return: torch.utils.data.TensorDataset, train_set, test_set, show_set selected from the test_set
+        """
         train_u_name = '../data/case_data/train/train_u_' + name + '.pt'
         train_y_name = '../data/case_data/train/train_y_' + name + '.pt'
         test_u_name = '../data/case_data/test/test_u_' + name + '.pt'
@@ -38,6 +41,11 @@ class MyData:
 
     @staticmethod
     def get_femto_data():
+        """
+        Get the CWRU dataset
+
+        :return: torch.utils.data.TensorDataset, train_set, test_set, show_set selected from the test_set
+        """
         train_u_path = '../data/femto_data/train/train_u_all.pt'
         train_y_path = '../data/femto_data/train/train_y_all.pt'
         test_u_path = '../data/femto_data/test/test_u_all.pt'

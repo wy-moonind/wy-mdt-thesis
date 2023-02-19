@@ -1,9 +1,7 @@
 import torch
 from torch import nn
 import matplotlib.pyplot as plt
-from loss_func import r2_loss
 # extra import
-from data import MyData
 from loss_func import RMSELoss, r2_loss
 
 
@@ -15,6 +13,18 @@ def validation(model: nn.Module,
                obs=False,  # print observer result
                show=False,
                fig_num=1):
+    """
+    Implementation of the validation process (for validation and test)
+    :param model: torch.nn.Module, model to be validated
+    :param val_set: torch.utils.data.TensorDataset, validation set
+    :param criterion: loss function
+    :param num_data: number of data to be shown
+    :param origin: bool, with or without observer?
+    :param obs: bool, with or without observer?
+    :param show: bool, show validation figures?
+    :param fig_num:
+    :return: float, the averaged metrics
+    """
     val_loader = torch.utils.data.DataLoader(
         dataset=val_set, batch_size=1, shuffle=False)
     if show:

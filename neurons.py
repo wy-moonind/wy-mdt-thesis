@@ -5,6 +5,11 @@ import copy
 
 
 def non_act(x):
+    """
+    Fake activation function without
+    :param x:
+    :return:
+    """
     return x
 
 
@@ -17,6 +22,9 @@ activ_dict = {'ReLU': nn.ReLU(),
 
 
 class StateNeuron(nn.Module):
+    """
+    State observer based network layer
+    """
     def __init__(self, order, in_dim=1, out_dim=1,
                  observer=False, activation='Tanh',
                  device=torch.device('cpu'),
@@ -51,18 +59,34 @@ class StateNeuron(nn.Module):
         self.reset_parameter()
 
     def reset_parameter(self):
+        """
+        Reinitialize all parameters
+        :return: None
+        """
         for weight in self.parameters():
             nn.init.uniform_(weight, -0.7, 0.7)
 
     def nonlinear(self, error):
+        """
+        Implementation of the fal function
+        :param error: error between the y_hat and y_obs
+        :return: torch.tensor
+        """
         # fal function
         assert self.observer
-        if(torch.abs(error) <= self.fixed_delta):
+        if torch.abs(error) <= self.fixed_delta:
             return torch.div(error, torch.pow(input=self.fixed_delta, exponent=(1-self.weight_alpha)))
         else:
             return torch.pow(input=torch.abs(error), exponent=self.weight_alpha) * torch.sign(error)
 
     def forward(self, u, y_obs=None, feat_list=None):
+        """
+        Forwarding the StateNeuron
+        :param u: torch.tensor, input
+        :param y_obs: torch.tensor, observation value
+        :param feat_list: None/list if feature map is required
+        :return: y_pred, prediction of output
+        """
         if u.ndim > 2:
             u = torch.squeeze(u)
         self.seq_len = u.shape[1]
@@ -110,6 +134,9 @@ class StateNeuron(nn.Module):
 
 
 class StateSpace(nn.Module):
+    """
+    State space implementation with only state function
+    """
 
     def __init__(self, order, in_dim=1, activation='Tanh', device=torch.device('cpu')):
         super(StateSpace, self).__init__()

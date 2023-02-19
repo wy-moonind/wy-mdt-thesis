@@ -5,6 +5,9 @@ import sys
 
 
 class TrainingHistory:
+    """
+    Definition of the training history
+    """
 
     def __init__(self):
         self.train_loss = []
@@ -22,8 +25,23 @@ def train(model: nn.Module,
           batch_size=1,
           optimizer='Adam',
           learning_rate=1e-3,
-          grad_clip=30, 
+          grad_clip=30,
           print_loss=True):
+    """
+    Implementation of the training process
+    :param model: torch.nn.Module, the model to be trained
+    :param criterion: loss function
+    :param metric: function of the R2 score
+    :param epoch: Maximum number of epochs
+    :param train_set: torch.utils.data.TensorDataset, training set
+    :param val_set: torch.utils.data.TensorDataset, validation set
+    :param batch_size: default to be 1
+    :param optimizer: string, name of the optimizer
+    :param learning_rate:
+    :param grad_clip: 30
+    :param print_loss: whether print the loss during the training
+    :return: Training history of each step
+    """
 
     history = TrainingHistory()
     train_loader = torch.utils.data.DataLoader(
@@ -57,7 +75,7 @@ def train(model: nn.Module,
                 temp_r2 = metric(output, y)
 
                 loss_per_step.append(loss.item())
-                if(torch.isnan(loss)):
+                if torch.isnan(loss):
                     print('NaN value, reinitialize parameters')
                     restart_inside = True
                     break
@@ -78,11 +96,11 @@ def train(model: nn.Module,
             history.train_r2.append(train_r2)
             if print_loss:
                 print('Epoch ', eph + 1,
-                    '\nTraining loss = ', train_loss, '; train r2 = ', train_r2)
+                      '\nTraining loss = ', train_loss, '; train r2 = ', train_r2)
 
             # validation
             if val_set is not None:
-                val_loss, val_r2, dump1, dump2 = validation(model, val_set, criterion=criterion,origin=False, obs=True)
+                val_loss, val_r2, dump1, dump2 = validation(model, val_set, criterion=criterion, origin=False, obs=True)
                 # history.val_loss.append(val_loss)
                 # history.val_r2.append(val_r2)
                 history.val_loss.append(val_loss)
@@ -91,7 +109,7 @@ def train(model: nn.Module,
                     print('Validation loss = ', val_loss, '; val r2 = ', val_r2)
 
             # Early-stopping
-            if eph >=2:
+            if eph >= 2:
                 if train_r2 < last_r2:
                     trigger_times += 1
                     if trigger_times >= patience:
