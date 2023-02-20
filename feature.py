@@ -173,6 +173,12 @@ def step4():
 
 def step5():
     model = torch.load('../models/outer07_15_5_parallel_newdata.pt')
+    model.return_feat = False
+    model.state_layer1.return_feat = False
+    model.state_layer2.return_feat = False
+    model.state_layer3.return_feat = False
+    model.state_layer4.return_feat = False
+    model.state_layer5.return_feat = False
     # model = torch.load('../models/show_feat_outer21_5_15_par.pt')
     # model.seq_len = 112
     # outer21 test
@@ -186,7 +192,7 @@ def step5():
     out_list = []
     target_list = []
     for idx, (batch_x, batch_obs, batch_y) in enumerate(loader_outer21):
-        pred, dump = model(batch_x, y_obs=batch_obs)
+        pred = model(batch_x, y_obs=batch_obs)
         out_list.append(pred.cpu().detach())
         target_list.append(batch_y.cpu())
         r2 = r2_loss(pred.cpu().detach(), batch_y.cpu())
@@ -202,12 +208,12 @@ def step5():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/outer07_val_par', dpi=300, bbox_inches='tight')
+    plt.savefig('../figs/outer07_val_par_origin', dpi=300, bbox_inches='tight')
 
-    # model1 = torch.load('../models/outer07_15_1_serial_linear.pt')
+    # model1 = torch.load('../models/outer21_15_1_serial_newdata.pt')
     # # outer21 test
-    # test_u = torch.load('../data/case_data_copy/test/test_u_outer07.pt')
-    # test_y = torch.load('../data/case_data_copy/test/test_y_outer07.pt')
+    # test_u = torch.load('../data/case_data_copy/test/test_u_outer21.pt')
+    # test_y = torch.load('../data/case_data_copy/test/test_y_outer21.pt')
     # test_set1 = Data.TensorDataset(test_u.cuda(),
     #                                     test_y.cuda(),
     #                                   test_y.cuda())
@@ -228,13 +234,13 @@ def step5():
     # plt.yticks(size=12)
     # plt.xlabel('Timesteps',fontsize=15)
     # plt.ylabel('Normalized Acceleration',fontsize=15)
-    # plt.savefig('../figs/outer07_val_linear', dpi=300, bbox_inches='tight')
+    # plt.savefig('../figs/outer21_val_nlinear_origin', dpi=300, bbox_inches='tight')
 
     plt.show()
 
 def step6():
     
-    name = 'outer21'
+    name = 'ball21'
     history = torch.load('../history/'+name+'_15_5_serial_newdata.pt')
     model = torch.load('../models/'+name+'_15_5_serial_newdata.pt')
     test_u = torch.load('../data/case_data/test/show_u_'+name+'.pt')
@@ -283,7 +289,7 @@ def step6():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/'+name+'_val', dpi=300, bbox_inches='tight')
+    plt.savefig('../figs/'+name+'_val_origin', dpi=300, bbox_inches='tight')
 
     plt.show()
 
@@ -336,7 +342,7 @@ def step8():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/femto0_val', dpi=300, bbox_inches='tight')
+    plt.savefig('../figs/femto0_val_origin', dpi=300, bbox_inches='tight')
     plt.figure(figsize=(8,4.5))
     plt.plot(rus[1].detach().cpu().numpy().T, color='blue')
     plt.plot(y[1].detach().cpu().numpy().T, color='red')
@@ -345,7 +351,7 @@ def step8():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    # plt.savefig('../figs/femto1_val', dpi=300, bbox_inches='tight')
+    plt.savefig('../figs/femto1_val_origin', dpi=300, bbox_inches='tight')
     plt.figure(figsize=(8,4.5))
     plt.plot(rus[2].detach().cpu().numpy().T, color='blue')
     plt.plot(y[2].detach().cpu().numpy().T, color='red')
@@ -354,7 +360,7 @@ def step8():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    # plt.savefig('../figs/femto2_val', dpi=300, bbox_inches='tight')
+    plt.savefig('../figs/femto2_val_origin', dpi=300, bbox_inches='tight')
 
     plt.show()
 
@@ -365,4 +371,4 @@ def step9():
 
 
 if __name__ == "__main__":
-    step3()
+    step8()

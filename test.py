@@ -167,16 +167,5 @@ from engine import ParallelModel
 # plt.savefig('../figs/final_figs/cwru_outer_example', dpi=300, bbox_inches='tight')
 # plt.show()
 
-def test_ref(a, lst:list):
-    a = [2]
-    lst.append(copy.deepcopy(a))
-    print(lst)
-    a.append(0)
-    print(lst)
-
-x = 1
-l = [1]
-
-test_ref(x, l)
 
 
