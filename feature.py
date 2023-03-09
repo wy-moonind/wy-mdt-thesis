@@ -77,6 +77,12 @@ def step2():
     plt.xticks(size=10)
     plt.yticks(size=10)
 
+    feat_nl = np.array(show_featmap[0].cpu().detach())
+    feat_l = np.array(show_featmap1[0].cpu().detach())
+    print(feat_nl.shape)
+    np.save("../fig_data/3.22_nl", feat_nl)
+    np.save("../fig_data/3.22_l", feat_l)
+
     # plt.savefig('../figs/nlso_lso_feature', dpi=300, bbox_inches='tight')
     plt.show()
 
@@ -115,7 +121,20 @@ def step3():
     plt.xticks(size=10)
     plt.yticks(size=10)
 
-    # plt.savefig('../figs/parallel_feature', dpi=300, bbox_inches='tight')
+    plt.savefig('../figs/parallel_feature', dpi=300, bbox_inches='tight')
+    show_featmap_np = []
+    show_featmap1_np = []
+    for feat in show_featmap[:5]:
+        feat = np.array(feat.cpu().detach(), dtype=object)
+        show_featmap_np.append(feat)
+    for feat in show_featmap1[:5]:
+        feat = np.array(feat.cpu().detach(), dtype=object)
+        show_featmap1_np.append(feat)
+    np.save("../fig_data/4.11", show_featmap_np)
+    np.save("../fig_data/4.12", show_featmap1_np)
+    
+    fx = np.load("../fig_data/4.11.npy", allow_pickle=True)
+    print(len(fx), fx[0].shape)
     plt.show()
 
 def step4():
@@ -133,7 +152,14 @@ def step4():
         pred = model(batch_x)
         out_list.append(pred.cpu().detach())
         target_list.append(batch_y.cpu())
-    
+        if idx > 2:
+            break
+    data1 = out_list[0].numpy()
+    data2 = target_list[0].numpy()
+    data = np.vstack((data1, data2))
+    print(data.shape)
+    np.save("../fig_data/3.5", data)
+
     plt.figure(figsize=(8,4.5))
     plt.plot(out_list[0].numpy().T, color='blue')
     plt.plot(target_list[0].numpy().T, color='red')
@@ -142,7 +168,7 @@ def step4():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/outer21_val_woobs', dpi=300, bbox_inches='tight')
+    # plt.savefig('../figs/outer21_val_woobs', dpi=300, bbox_inches='tight')
 
     model1 = torch.load('../models/outer07_15_1_serial_woobs.pt')
     # outer21 test
@@ -158,7 +184,15 @@ def step4():
         pred = model1(batch_x)
         out_list1.append(pred.cpu().detach())
         target_list1.append(batch_y.cpu())
+        if idx > 2:
+            break
     
+    data3 = out_list1[0].numpy()
+    data4 = target_list1[0].numpy()
+    data0 = np.vstack((data3, data4))
+    print(data.shape)
+    np.save("../fig_data/3.3", data0)
+
     plt.figure(figsize=(8,4.5))
     plt.plot(out_list1[0].numpy().T, color='blue')
     plt.plot(target_list1[0].numpy().T, color='red')
@@ -167,23 +201,22 @@ def step4():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/outer07_val_woobs', dpi=300, bbox_inches='tight')
+    # plt.savefig('../figs/outer07_val_woobs', dpi=300, bbox_inches='tight')
 
     plt.show()
 
 def step5():
-    model = torch.load('../models/outer07_15_5_parallel_newdata.pt')
+    model = torch.load('../models/outer21_15_5_serial_newdata.pt')
     model.return_feat = False
-    model.state_layer1.return_feat = False
-    model.state_layer2.return_feat = False
-    model.state_layer3.return_feat = False
-    model.state_layer4.return_feat = False
-    model.state_layer5.return_feat = False
+    # model.state_layer1.return_feat = False
+    # model.state_layer2.return_feat = False
+    # model.state_layer3.return_feat = False
+    # model.state_layer4.return_feat = False
+    # model.state_layer5.return_feat = False
     # model = torch.load('../models/show_feat_outer21_5_15_par.pt')
-    # model.seq_len = 112
     # outer21 test
-    test_u = torch.load('../data/case_data/test/test_u_outer07.pt')
-    test_y = torch.load('../data/case_data/test/test_y_outer07.pt')
+    test_u = torch.load('../data/case_data/test/test_u_outer21.pt')
+    test_y = torch.load('../data/case_data/test/test_y_outer21.pt')
     test_set1 = Data.TensorDataset(test_u.cuda(),
                                       test_y.cuda(),
                                       test_y.cuda())
@@ -199,7 +232,11 @@ def step5():
         if idx == 0:
             print(r2)
             break
-    
+    data1 = out_list[0].numpy()
+    data2 = target_list[0].numpy()
+    data = np.vstack((data1, data2))
+    print(data.shape)
+    np.save("../fig_data/4.9", data)
     plt.figure(figsize=(8,4.5))
     plt.plot(out_list[0].numpy().T, color='blue')
     plt.plot(target_list[0].numpy().T, color='red')
@@ -208,7 +245,7 @@ def step5():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/outer07_val_par_origin', dpi=300, bbox_inches='tight')
+    # plt.savefig('../figs/outer07_val_par_origin', dpi=300, bbox_inches='tight')
 
     # model1 = torch.load('../models/outer21_15_1_serial_newdata.pt')
     # # outer21 test
@@ -240,13 +277,13 @@ def step5():
 
 def step6():
     
-    name = 'ball21'
+    name = 'femto'
     history = torch.load('../history/'+name+'_15_5_serial_newdata.pt')
     model = torch.load('../models/'+name+'_15_5_serial_newdata.pt')
-    test_u = torch.load('../data/case_data/test/show_u_'+name+'.pt')
-    test_y = torch.load('../data/case_data/test/show_y_'+name+'.pt')
-    # test_u = torch.load('../data/femto_data/test/show_u_all.pt')
-    # test_y = torch.load('../data/femto_data/test/show_y_all.pt')
+    # test_u = torch.load('../data/case_data/test/show_u_'+name+'.pt')
+    # test_y = torch.load('../data/case_data/test/show_y_'+name+'.pt')
+    test_u = torch.load('../data/femto_data/test/show_u_all.pt')
+    test_y = torch.load('../data/femto_data/test/show_y_all.pt')
 
     real_epoch = len(history[0, :])
     fig = plt.figure(figsize=(6,4))
@@ -268,7 +305,7 @@ def step6():
     ax1.set_xlim(0, 12)
     ax2.set_ylim(0, 1)
     ax2.set_xlim(0, 12)
-    fig.savefig('../figs/'+name+'_loss', dpi=300, bbox_inches='tight')
+    # fig.savefig('../figs/'+name+'_loss', dpi=300, bbox_inches='tight')
     
     testset = Data.TensorDataset(test_u.cuda(),
                                         test_y.cuda(),
@@ -289,7 +326,15 @@ def step6():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/'+name+'_val_origin', dpi=300, bbox_inches='tight')
+    # plt.savefig('../figs/'+name+'_val_origin', dpi=300, bbox_inches='tight')
+
+    # history: train loss train r2 val loss val r2
+    his_np = np.array(history)
+    print(his_np.shape)
+    np.save("../fig_data/5.17", his_np)
+    # data = np.vstack((rus[0].detach().cpu().numpy(), y[0].detach().cpu().numpy()))
+    # print(data.shape)
+    # np.save("../fig_data/5.16", data)
 
     plt.show()
 
@@ -346,12 +391,12 @@ def step8():
     plt.figure(figsize=(8,4.5))
     plt.plot(rus[1].detach().cpu().numpy().T, color='blue')
     plt.plot(y[1].detach().cpu().numpy().T, color='red')
-    plt.legend(['Predicted signal', 'Actual signal'], loc="upper right")
+    # plt.legend(['Predicted signal', 'Actual signal'], loc="upper right")
     plt.xticks(size=12)
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/femto1_val_origin', dpi=300, bbox_inches='tight')
+    # plt.savefig('../figs/femto1_val_origin', dpi=300, bbox_inches='tight')
     plt.figure(figsize=(8,4.5))
     plt.plot(rus[2].detach().cpu().numpy().T, color='blue')
     plt.plot(y[2].detach().cpu().numpy().T, color='red')
@@ -360,12 +405,86 @@ def step8():
     plt.yticks(size=12)
     plt.xlabel('Timesteps',fontsize=15)
     plt.ylabel('Normalized Acceleration',fontsize=15)
-    plt.savefig('../figs/femto2_val_origin', dpi=300, bbox_inches='tight')
+    # plt.savefig('../figs/femto2_val_origin', dpi=300, bbox_inches='tight')
+
+    # history: train loss train r2 val loss val r2
+    data = np.vstack((rus[0].detach().cpu().numpy(), y[0].detach().cpu().numpy()))
+    print(data.shape)
+    np.save("../fig_data/5.18", data)
+    data1 = np.vstack((rus[1].detach().cpu().numpy(), y[1].detach().cpu().numpy()))
+    print(data1.shape)
+    np.save("../fig_data/5.19", data1)
+    data2 = np.vstack((rus[2].detach().cpu().numpy(), y[2].detach().cpu().numpy()))
+    print(data2.shape)
+    np.save("../fig_data/5.20", data2)
 
     plt.show()
 
 def step9():
-    pass
+    model = torch.load('../models/outer21_15_1_serial_newdata.pt')
+    # outer21 test
+    test_u = torch.load('../data/case_data_copy/test/test_u_outer21.pt')
+    test_y = torch.load('../data/case_data_copy/test/test_y_outer21.pt')
+    test_set1 = Data.TensorDataset(test_u.cuda(),
+                                      test_y.cuda())
+    loader_outer21 = torch.utils.data.DataLoader(
+        dataset=test_set1, batch_size=1, shuffle=False)
+    out_list = []
+    target_list = []
+    for idx, (batch_x, batch_y) in enumerate(loader_outer21):
+        pred = model(batch_x, batch_y)
+        out_list.append(pred.cpu().detach())
+        target_list.append(batch_y.cpu())
+        if idx > 2:
+            break
+    data1 = out_list[0].numpy()
+    data2 = target_list[0].numpy()
+    data = np.vstack((data1, data2))
+    print(data.shape)
+    np.save("../fig_data/3.21", data)
+
+    plt.figure(figsize=(8,4.5))
+    plt.plot(out_list[0].numpy().T, color='blue')
+    plt.plot(target_list[0].numpy().T, color='red')
+    plt.legend(['Predicted signal', 'Actual signal'], loc="upper right")
+    plt.xticks(size=12)
+    plt.yticks(size=12)
+    plt.xlabel('Timesteps',fontsize=15)
+    plt.ylabel('Normalized Acceleration',fontsize=15)
+
+    # model1 = torch.load('../models/outer07_15_1_serial_linear.pt')
+    # # outer21 test
+    # test_u = torch.load('../data/case_data_copy/test/test_u_outer07.pt')
+    # test_y = torch.load('../data/case_data_copy/test/test_y_outer07.pt')
+    # test_set1 = Data.TensorDataset(test_u.cuda(),
+    #                                   test_y.cuda())
+    # loader_outer07 = torch.utils.data.DataLoader(
+    #     dataset=test_set1, batch_size=1, shuffle=False)
+    # out_list1 = []
+    # target_list1 = []
+    # for idx, (batch_x, batch_y) in enumerate(loader_outer07):
+    #     pred = model1(batch_x, batch_y)
+    #     out_list1.append(pred.cpu().detach())
+    #     target_list1.append(batch_y.cpu())
+    #     if idx > 2:
+    #         break
+    
+    # data3 = out_list1[0].numpy()
+    # data4 = target_list1[0].numpy()
+    # data0 = np.vstack((data3, data4))
+    # print(data0.shape)
+    # np.save("../fig_data/3.12", data0)
+
+    # plt.figure(figsize=(8,4.5))
+    # plt.plot(out_list1[0].numpy().T, color='blue')
+    # plt.plot(target_list1[0].numpy().T, color='red')
+    # plt.legend(['Predicted signal', 'Actual signal'], loc="upper right")
+    # plt.xticks(size=12)
+    # plt.yticks(size=12)
+    # plt.xlabel('Timesteps',fontsize=15)
+    # plt.ylabel('Normalized Acceleration',fontsize=15)
+
+    plt.show()
 
 
 

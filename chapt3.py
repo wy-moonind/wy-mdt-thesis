@@ -92,5 +92,5 @@ def activation_figs():
 
 
 if __name__ == "__main__":
-    # woobs_figs('outer07')
-    activation_figs()
+    woobs_figs('outer07')
+    # activation_figs()
